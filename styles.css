@@ -330,7 +330,7 @@ padding: 5px;
     font-size: 20px;
 
 }
-@media (max-width: 500px){
+@media only screen and (max-width: 500px){
     .text, .footer{
         display: none;
 
