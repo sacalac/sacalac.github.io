@@ -331,9 +331,11 @@ padding: 5px;
 
 }
 @media (max-width: 412px){
-    body{
+    .text, .footer{
         display: none;
+        
     }
+        
 }
  
 
