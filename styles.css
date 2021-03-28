@@ -335,6 +335,9 @@ padding: 5px;
         display: none;
 
     }
+    .container{
+        background-image: linear-gradient(rgb(0,0,0,0.75),rgb(0,0,0,0.75)), url(mobile-media/bgdmisu.jpg);
+    }
         
 }
  
