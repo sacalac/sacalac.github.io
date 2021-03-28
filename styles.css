@@ -330,13 +330,6 @@ padding: 5px;
     font-size: 20px;
 
 }
-@media only screen and (max-width: 522px) {
-    .container{
-        background-image: linear-gradient(rgb(0,0,0,0.75),rgb(0,0,0,0.75)), url(mobile-media/bgdmisu.jpg);
-    }
-    
-    
-}
 
  
 
