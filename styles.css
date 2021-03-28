@@ -10,7 +10,7 @@ body{
 }
 .container{
     background-image: linear-gradient(rgb(0,0,0,0.75),rgb(0,0,0,0.75)), url(media/bgdmisu2.jpg);
-	background-size:contain;
+	background-size: cover;
 	width: 100%;
 	height: 100vh;
 	background-position: center;
@@ -330,17 +330,7 @@ padding: 5px;
     font-size: 20px;
 
 }
-@media only screen and (max-width: 500px){
-    .text, .footer{
-        display: none;
 
-    }
-    .container{
-        background-image: linear-gradient(rgb(0,0,0,0.75),rgb(0,0,0,0.75)), url(mobile-media/bgdmisu.jpg);
-    }
-        
-}
- 
 
 
 
