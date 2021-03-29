@@ -1,343 +1,98 @@
 *{
     margin: 0;
     padding: 0;
-
 }
-body{
-    
-    /*height: 100%;
-    overflow: hidden;*/
+.container1{
+    height: 100%;
+    width: 100%;
+    display: grid;
+    grid-template-columns: auto;
+    grid-template-rows: 10% 10% 60% 10%;
+    grid-template-areas: 
+    "logo"
+    "menu"
+    "wrapper"
+    "footer";
 }
-.container{
-    background-image: linear-gradient(rgb(0,0,0,0.75),rgb(0,0,0,0.75)), url(media/bgdmisu2.jpg);
-	background-size: cover;
-	width: 100%;
-	height: 100vh;
-	background-position: center;
-    
-}
-.navbar{
-display: flex;
-background-image: linear-gradient(to right,rgba(0,128,128),rgba(0,128,128,0));
-height: 30px;
-justify-content: space-between;
-padding: 5px;
-}
-
-.navbar ul{
+.logo{
+    background-color: black;
+    grid-area: logo;
     display: flex;
     align-items: center;
     justify-content: center;
+}
+.logo img{
+    height: 50px;
+    width: 100px;
+}
+.menu{
+   
+    grid-area: menu;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+}
+.menu ul{
+    display: flex;
+    flex-wrap: wrap;
     list-style: none;
-    padding: 0px;
-}
-.navbar ul li{
-    padding: 0px;  
-}
-.navbar ul li a{
-    text-decoration: none;
-    color: white;
-    font-family: sans-serif;
-    font-size: 15px;
-    padding: 10px;
-    margin: 3px;
-    margin-left: 10px;
-}
-.navbar ul li a:hover{
-    background-color: teal;
-    border-radius: 25px;
-    transition: 0.5s;
-}
-
-.text{
-    margin:0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 440px;
-    color: white;
-}
-.text h1{
-    font-family: Fascinate;
-	font-size: 120px;
-}
-.text p{
-    margin: 20px auto;
-	font-weight: 100;
-	line-height: 30px;
-    font-size: 20px;
-}
-.footer{
-    background-image:  linear-gradient(to left,rgb(1, 58, 58),rgba(0,128,128,0));
-    height: 45px;
-    display: flex;
     justify-content: space-between;
     align-items: center;
-    width: 57%;
-    float: right;
+    height: 100%;
+    width: 50%;
+      
 }
-.social img{
-    height: 40px;
-}
-.social img:hover{
-    height: 45px;
-    
-}
-.social a{
-    
-    display: inline-block;
-    margin-right: 20px;
-    margin-top: 3px;
-    margin-bottom: 3px;
-}
-
-.button{
-    
-    padding: 10px 50px;
-    margin-left: 25px;
-    color: white;
-	text-align: center;
-	text-decoration: none;
-	border-radius: 25px;
-	font-weight: bold;
-	border: 2px solid #009688;
-	background: transparent;
-	font-size: 15px;
-    font-family: sans-serif;
-	cursor: pointer;
-}
-.button:hover{
-  background-color: teal; 
-  transition: 0.5s;
-  
-}
-.container2{
-    
-    width: 100%;
-    height: 100vh;
-    background-color: teal;
-    display: grid;
-    grid-template-columns: 30% 30% auto;
-    grid-template-rows: 100%;
-    row-gap: 30px;
-    grid-template-areas: 
-    "about skills gallery"
-    
-}
-
-
-.about{
-   box-shadow: 0px 0px 15px 5px black;
-   grid-area: about;
-  
-}
-.skills{
-    box-shadow: 0px 0px 15px 5px black;
-    color: white;
-    grid-area: skills;
-}
-.gallery{
-    grid-area: gallery;
-}
-#photo{
-    
-    margin-top: 20px;
-    border-radius: 50%;
-    height: 130px;
-    width: 130px;
-}
-.container2 .skills .prg{
-    border-radius: 25px;
-
-}
-.about h2, p{
-    text-align: center;
-    color: white;
-    font-family: sans-serif;
-}
-.about p{
-    margin: 25px;
-    font-size: 20px;
-}
-.container2 .ctr{
-    margin: 30px;
-    background-color: rgba(0,0,0,0.5);
-    border-radius: 25px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
-.container2 a{
-    text-decoration: none;
-    color: white;
-    border: 2px solid teal;
-    background-color: transparent;
-    border-radius: 25px;
-    padding: 10px 20px;
-    margin-bottom: 15px;
-
-}
-.container2 a:hover{
-    background-color: teal;
-    transition: 0.5s;
-    padding: 10px 30px;
-}
-    
-
-.container2 .skills .prg{
-    background-color: white;
-    
-
-}
-.percentage{
-    color: teal;
-}
-.gallery{
-    overflow: scroll;
-    margin: 30px;
-    box-shadow: 0px 0px 15px 5px black;
-    background-color: rgba(0,0,0,0.5);
-    border-radius: 25px;
-    display: grid;
-    grid-template-columns: 100%;
-    grid-template-rows: repeat(9, 100%);
-}
-
-.gallery::-webkit-scrollbar{
-    display: none;
-}
-
-.pic1{
-    background-image: url(media2/20210226_121518.jpg);
-}
-.pic2{
-    background-image: url(media2/misu2.jpg);
-}
-.pic3{
-    background-image: url(media2/20200803_192144.jpg);
-}
-.pic4{
-    background-image: url(media2/20201006_154204.jpg);
-}
-.pic5{
-    background-image: url(media2/20201011_170738.jpg);
-}
-.pic6{
-    background-image: url(media2/20210220_205501.jpg);
-}
-.pic7{
-    background-image: url(media2/20210220_205506.jpg);
-}
-.pic8{
-    background-image: url(media2/20210226_121318.jpg);
-}
-.pic9{
-    background-image: url(media2/20210226_121356.jpg);
-}
-.pic{
-    margin-top: -60px;
-    background-position: center;
-    background-size: cover;
-    border-radius: 25px;
-    height: 80%;
-    width: 80%;
-    justify-self: center;
-    align-self: center;
-}
-
-
-.container3{
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    height: 100vh;
-    background-image: linear-gradient(rgb(0,0,0,0.75),rgb(0,0,0,0.75)), url(media/bgdmisu2.jpg);
-    background-position: center;
-    background-size: cover;
-}
-.form{
-    box-shadow: 0px 0px 15px 5px black;
+.menu ul li{
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 80vh;
-    background-color: rgba(0,128,128,0.3);
-    margin: 20px 400px;
-    border-radius: 25px;
-    
+    padding: 10px;
 }
-.form form{
-    display: flex;
-    flex-direction: column;
-    margin: 30px;
-    color: white;
+.menu ul li a{
     font-family: sans-serif;
-    
-}
-#submit{
-    background-color: transparent;
-    padding: 5px;
-    width: 70px;
-    border: 2px solid teal;
-    border-radius: 25px;
-    color: white;
-    font-family: sans-serif;
-    cursor: pointer;
-    font-size: 15px;
-}
-#submit:hover{
-    background-color: teal;
-    transition: 0.5s;
-}
-.ftr{
-    display: flex;
-    justify-content: space-evenly;
-    height: 15vh;
-    background-color: rgb(38, 39, 39);
-}
-.ftr a{
-    margin: 30px;
+    padding-top: 5px;
+    padding-bottom: 5px;
     text-decoration: none;
-    color: white;
-    font-size: 15px;
-    font-family: sans-serif;
+    color: black; 
 }
-.form a{
-    margin-top: 10px;
-    font-size: 15px;
-    text-align: center;
-    text-decoration: none;
-    background-color: transparent;
-    padding: 2px;
-    width: 50px;
-    border: 2px solid teal;
-    border-radius: 25px;
-    color: white;
-    font-family: sans-serif;
+.menu ul li a:hover{
+    border-bottom: 2px solid black;
+    border-top: 2px solid black;
 }
-.form a:hover{
-    background-color: teal;
-    transition: 0.5s;
+.wrapper{
+    margin-left: 50px;
+    margin-right: 50px;
+    background-image: linear-gradient(rgba(0,0,0,0.5),rgba(0,0,0,0.5)),url(media/bgdmisu.jpg);
+    background-size: cover;
+    background-position: center;
+    height: auto;
+    grid-area: wrapper;
+    margin-bottom: 10px;
 }
-.gallery .pic1 p{
-    margin-top: 15px;
-    color: white;
-    background-color: teal;
-    padding: 10px 0px;
-    font-size: 20px;
-
+.footer{
+    background-color: chartreuse;
+    grid-area: footer;
 }
 
 
 
 
+@media only screen and (max-width: 500px){
+    .menu ul{
+        justify-content: center;
+        flex-direction: column;
+    }
+    .menu ul li a{
+        font-weight: 600;
+    }
+    .wrapper{
+        background-image: linear-gradient(rgba(0,0,0,0.5),rgba(0,0,0,0.5)),url(mobile-media/bgdmisu.jpg);
+        margin-left: 0px;
+        margin-right: 0px;
+    }
+    .container1{
+        grid-template-rows: 10% auto 60% 10%;
+    }
 
-
-   
-
-
-
-
+}
