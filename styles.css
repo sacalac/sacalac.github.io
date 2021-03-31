@@ -51,22 +51,21 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 10px;   
+    padding: 5px;   
 }
-
 
 .menu ul li a{
     font-family: sans-serif;
-    padding-top: 5px;
-    padding-bottom: 5px;
+    padding-top: 3px;
+    padding-bottom: 3px;
     text-decoration: none;
     color: black; 
     
     
 }
 .menu ul li a:hover{
-    border-bottom: 2px solid black;
-    border-top: 2px solid black;
+    border-bottom: 1px solid black;
+    border-top: 1px solid black;
 }
 .wrapper{
     display: flex;
@@ -137,7 +136,7 @@
         grid-template-rows: 10% 5% 75% 10%;
     }
     .container1:hover{
-        grid-template-rows: 8% auto 55% 8%;
+        grid-template-rows: 8% auto 60% 8%;
     }
     .wrapper h1{
         font-size: 80px;
@@ -152,7 +151,7 @@
     .menu:hover ul{
         display: flex;
     }
-    .menu:hover .dropbtn{
+    .menu:hover .fa-bars{
         display: none;
     }
     
