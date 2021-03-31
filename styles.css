@@ -33,6 +33,8 @@
     justify-content: center;
     align-items: center;
 }
+
+}
 .menu ul{
     margin: 0;
     display: flex;
@@ -135,7 +137,7 @@
         grid-template-rows: 10% 5% 75% 10%;
     }
     .container1:hover{
-        grid-template-rows: 8% auto 60% 8%;
+        grid-template-rows: 8% auto 55% 8%;
     }
     .wrapper h1{
         font-size: 80px;
@@ -150,7 +152,7 @@
     .menu:hover ul{
         display: flex;
     }
-    .menu:hover .fa-bars{
+    .menu:hover .dropbtn{
         display: none;
     }
     
