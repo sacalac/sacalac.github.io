@@ -115,6 +115,105 @@
     cursor: pointer;
     margin: 0;
 }
+/*SECOND PAGE*/
+
+.container2{
+    height: 100%;
+    width: 100%;
+    display: grid;
+    grid-template-columns: auto;
+    grid-template-rows: 10% 10% auto 10%;
+    grid-template-areas: 
+    "logo"
+    "menu"
+    "wrapper"
+    "footer";
+}
+.logo2{
+    background-color: black;
+    grid-area: logo;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.logo2 img{
+    height: 50px;
+    width: 100px;
+}
+.menu2{
+    
+    grid-area: menu;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+}
+.menu2 .fa-bars2{
+    display: none;
+}
+
+
+.menu2 ul{
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    list-style: none;
+    justify-content: space-evenly;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    
+      
+}
+.menu2 ul li{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 5px;   
+}
+
+.menu2 ul li a{
+    font-family: sans-serif;
+    padding-top: 3px;
+    padding-bottom: 3px;
+    text-decoration: none;
+    color: black; 
+    
+    
+}
+.menu2 ul li a:hover{
+    border-bottom: 1px solid black;
+    border-top: 1px solid black;
+}
+.wrapper2{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-left: 100px;
+    margin-right: 100px;
+    background-image: linear-gradient(rgba(0,0,0,0.5),rgba(0,0,0,0.5)),url(media/bgdmisu.jpg);
+    background-size: cover;
+    background-position: center;
+    height: auto;
+    grid-area: wrapper;
+}
+
+.footer2{
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    grid-area: footer;
+    
+}
+.footer2 i{
+    font-size: 50px;
+    cursor: pointer;
+    margin: 0;
+}
+
+
+    
 
 
 
@@ -122,13 +221,13 @@
 
 
 @media only screen and (max-width: 500px){
-    .menu ul{
+    .menu ul, .menu2 ul{
         align-items: center;
         justify-content: center;
         flex-direction: column;
     }
    
-    .menu ul li a{
+    .menu ul li a, .menu2 ul li a{
         font-weight: 600;
         color: white;
         border-color: white;
@@ -136,40 +235,40 @@
         justify-content: center;
         align-items: center;
     }
-    .menu ul li a:hover{
+    .menu ul li a:hover, .menu2 ul li a:hover{
         border-top: 1px solid white;
         border-bottom: 1px solid white;
     }
-    .wrapper{
+    .wrapper, .wrapper2{
         background-image: linear-gradient(rgba(0,0,0,0.3),rgba(0,0,0,0.3)),url(mobile-media/bgdmisu.jpg);
         margin-left: 0px;
         margin-right: 0px;
     }
-    .container1{
+    .container1, .container2{
         grid-template-rows: 10% 5% 75% 10%;
     }
     
     .wrapper h1{
         font-size: 80px;
     }
-    .menu .fa-bars{
+    .menu .fa-bars, .menu2 .fa-bars2{
         display: block;
     }
-    .menu{
+    .menu, .menu2{
         position: relative;
     }
-    .menu ul{
+    .menu ul, .menu2 ul{
         display: none;
         position: absolute;
     }
-    .menu:hover ul{
+    .menu:hover ul, .menu2:hover ul{
         display: flex;
         color: white;
         background-color: black;
         height: 25vh;
     }
     
-    .menu:hover .fa-bars{
+    .menu:hover .fa-bars, .menu2:hover .fa-bars2{
         display: none;
     }
     
