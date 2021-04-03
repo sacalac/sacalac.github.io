@@ -263,13 +263,16 @@
     }
     .menu:hover ul, .menu2:hover ul{
         display: flex;
+        transition: 0.5s;
         color: white;
         background-color: black;
-        height: 25vh;
+        height: 20vh;
+        margin-top: 200px;
     }
     
     .menu:hover .fa-bars, .menu2:hover .fa-bars2{
-        display: none;
+        transform: rotate(90deg);
+        transition: 0.5s;
     }
     
         
