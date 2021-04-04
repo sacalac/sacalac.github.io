@@ -278,7 +278,7 @@
         margin-left: 0px;
         margin-right: 0px;
         display: flex;
-        align-items: flex-end;
+        align-items: center;
         overflow: auto;
         
     }
@@ -288,18 +288,12 @@
         margin: 15px;
         flex: auto;
         width: auto;
-        height: 50px;
-        box-shadow: 0px 10px 13px -7px #ffffff; 
+        height: 300px;
+    }
         
         
-    }
-    .wrapper2 img:hover{
-        transition: 0.5s;
-        position: absolute;
-      top: 40%;
-      right: 42%;
-      transform: scale(6);
-    }
+        
+    
     html, body {
         margin: 0;
         height: 100%;
