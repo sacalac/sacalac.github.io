@@ -294,6 +294,7 @@
         
     }
     .wrapper2 img:hover{
+        transition: 0.5s;
         position: absolute;
       top: 40%;
       right: 42%;
