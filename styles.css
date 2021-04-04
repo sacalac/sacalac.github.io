@@ -194,7 +194,7 @@
     background-image: linear-gradient(rgba(0,0,0,0.5),rgba(0,0,0,0.5)),url(media/bgdmisu.jpg);
     background-size: cover;
     background-position: center;
-    height: auto;
+    
     grid-area: wrapper;
 }
 
@@ -281,21 +281,38 @@
         background-image: linear-gradient(rgba(0,0,0,0.3),rgba(0,0,0,0.3)),url(mobile-media/bgdmisu.jpg);
         margin-left: 0px;
         margin-right: 0px;
-        flex-wrap: wrap;
-        overflow: scroll;
-    
+        overflow: auto;
+    }
     
     }
-    .wrapper2 img{
-        
-        margin: 15px;
-        width: 300px;
+    .wrapper2 .gallery{
+        align-items:center;
+        justify-content: center;
+        display: flex;
+        flex-flow: column wrap;
+       height: 75vh;
+       margin-left: 27px;
+       margin-right: 27px;
+        width: 90%;
+       background-color: rgba(252, 252, 252, 0.3);
+           
+    }
+    .wrapper2 .gallery img{
+        flex: auto;
+        width: 95px;
         height: auto;
+        margin-top: 5px;
+        margin-bottom: 5px;
         
-       
-       
-
     }
+    .wrapper2 .gallery img:active{
+        position: absolute;
+        transform: scale(3.5,3.5);
+        transition: 0.5s;
+        
+    
+
+    
     html, body {
         margin: 0;
         height: 100%;
@@ -306,5 +323,4 @@
     
         
     
-   
 }
