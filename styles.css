@@ -305,7 +305,7 @@
         display: none;
         padding: 0;
         margin: 0;
-        height: 450px;
+        height: 400px;
         width: auto;
        
     }
@@ -389,9 +389,18 @@
         height: 100%;
         overflow: hidden;
     }
-    
-    
-    
-        
-    
+}
+@media only screen and (max-height: 650px){
+    .thumbnails{
+        height: 90px;
+    }
+    .photos img{
+        height: 350px;
+    }
+    .lightbox{
+        height: 380px;
+    }
+    .photos{
+        height: 350px;
+    }    
 }
