@@ -186,6 +186,7 @@
     border-top: 1px solid black;
 }
 .wrapper2{
+    
     margin-left: 100px;
     margin-right: 100px;
     background-image: linear-gradient(rgba(0,0,0,0.5),rgba(0,0,0,0.5)),url(media/bgdmisu.jpg);
@@ -265,8 +266,9 @@
         transition: 0.5s;
         color: white;
         background-color: black;
-        height: 20vh;
-        margin-top: 205px;
+        height: 22vh;
+        padding-top: 10px;
+        margin-top: 115px;
     }
     
     .menu:hover .fa-bars, .menu2:hover .fa-bars2{
@@ -277,20 +279,108 @@
         background-image: linear-gradient(rgba(0,0,0,0.3),rgba(0,0,0,0.3)),url(mobile-media/bgdmisu.jpg);
         margin-left: 0px;
         margin-right: 0px;
-        display: flex;
-        align-items: center;
+        
         overflow: auto;
         
     }
-    
-    
-    .wrapper2 img{  
-        margin: 15px;
-        flex: auto;
-        width: auto;
-        height: 300px;
-    }
+    .lightbox{
+        background-color: rgba(0,0,0,0.7);
+        display: flex;
+        justify-content: center;
+        align-items: center;
         
+        height: 500px;
+        width: 100%;
+    }
+    .photos{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        
+        height: 400px;
+        width: 100%;
+    }
+    
+    .photos img{
+        display: none;
+        padding: 0;
+        margin: 0;
+        height: 450px;
+        width: auto;
+       
+    }
+    
+    #pic1:target {
+        display: block;
+    }
+    #pic2:target{
+        display: block;
+        height: auto;
+        width: 390px;
+    }
+    #pic3:target{
+        display: block;
+    }
+    #pic4:target{
+        display: block;
+        height: auto;
+        width: 390px;
+    }
+    #pic5:target{
+        display: block;
+    }
+    #pic6:target{
+        display: block;
+        height: auto;
+        width: 390px;
+    }
+    #pic7:target{
+        display: block;
+    }
+    #pic8:target{
+        display: block;
+        height: auto;
+        width: 390px;
+    }
+    #pic9:target{
+        display: block;
+    }
+    #pic10:target{
+        display: block;
+    }
+    #pic11:target{
+        display: block;
+    }
+    #pic12:target{
+        display: block;
+    }
+    #pic13:target{
+        display: block;
+    }
+    #pic14:target{
+        display: block;
+    }
+    
+    .thumbnails{
+        margin-right: 10px;
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        background-color: rgba(255, 255, 255, 0.1);
+        height: 100px;
+        width: 100%;
+        overflow: auto;
+    }
+    .thumbnails img{  
+        margin-right: 10px;
+        width: auto;
+        height: 70px;
+    }
+    .thumbnails a{
+        margin: 5px;
+    }
+    
+    
         
         
     
