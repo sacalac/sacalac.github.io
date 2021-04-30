@@ -310,17 +310,203 @@ html, body {
     cursor: pointer;
     margin: 0;
 }
+/*THIRD PAGE*/
+.container3{
+    height: 100%;
+    width: 100%;
+    display: grid;
+    grid-template-columns: auto;
+    grid-template-rows: 10% 10% auto 10%;
+    grid-template-areas: 
+    "logo"
+    "menu"
+    "wrapper"
+    "footer";
+}
+.logo3{
+    background-color: black;
+    grid-area: logo;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.logo3 img{
+    height: 50px;
+    width: 100px;
+}
+.menu3{
+    
+    grid-area: menu;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+}
+.menu3 .fa-bars3{
+    display: none;
+}
+
+
+.menu3 ul{
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    list-style: none;
+    justify-content: space-evenly;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    
+      
+}
+.menu3 ul li{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 5px;   
+}
+
+.menu3 ul li a{
+    font-family: sans-serif;
+    padding-top: 3px;
+    padding-bottom: 3px;
+    text-decoration: none;
+    color: black; 
+    
+    
+}
+.menu3 ul li a:hover{
+    border-bottom: 1px solid black;
+    border-top: 1px solid black;
+}
+.wrapper3{
+    
+    margin-left: 100px;
+    margin-right: 100px;
+    background-image: linear-gradient(rgba(0,0,0,0.5),rgba(0,0,0,0.5)),url(media/bgdmisu.jpg);
+    background-size: cover;
+    background-position: center;
+    grid-area: wrapper;
+    overflow: auto;
+    }
+
+    .footer3 {
+        display: flex;
+        align-items: center;
+        justify-content: space-evenly;
+        grid-area: footer;
+        
+    }
+    .footer3 i{
+        font-size: 50px;
+        cursor: pointer;
+        margin: 0;
+    }
+    /*4TH PAGE*/
+    .container4{
+        height: 100%;
+        width: 100%;
+        display: grid;
+        grid-template-columns: auto;
+        grid-template-rows: 10% 10% auto 10%;
+        grid-template-areas: 
+        "logo"
+        "menu"
+        "wrapper"
+        "footer";
+    }
+    .logo4{
+        background-color: black;
+        grid-area: logo;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .logo4 img{
+        height: 50px;
+        width: 100px;
+    }
+    .menu4{
+        
+        grid-area: menu;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+    }
+    .menu4 .fa-bars4{
+        display: none;
+    }
+    
+    
+    .menu4 ul{
+        margin: 0;
+        display: flex;
+        flex-wrap: wrap;
+        list-style: none;
+        justify-content: space-evenly;
+        align-items: center;
+        height: 100%;
+        width: 100%;
+        
+          
+    }
+    .menu4 ul li{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 5px;   
+    }
+    
+    .menu4 ul li a{
+        font-family: sans-serif;
+        padding-top: 3px;
+        padding-bottom: 3px;
+        text-decoration: none;
+        color: black; 
+        
+        
+    }
+    .menu4 ul li a:hover{
+        border-bottom: 1px solid black;
+        border-top: 1px solid black;
+    }
+    .wrapper4{
+        
+        margin-left: 100px;
+        margin-right: 100px;
+        background-image: linear-gradient(rgba(0,0,0,0.5),rgba(0,0,0,0.5)),url(media/bgdmisu.jpg);
+        background-size: cover;
+        background-position: center;
+        grid-area: wrapper;
+        overflow: auto;
+        }
+    
+        .footer4 {
+            display: flex;
+            align-items: center;
+            justify-content: space-evenly;
+            grid-area: footer;
+            
+        }
+        .footer4 i{
+            font-size: 50px;
+            cursor: pointer;
+            margin: 0;
+        }
 
 
 
 @media only screen and (max-width: 500px){
-    .menu ul, .menu2 ul{
+    
+
+    .menu ul, .menu2 ul, .menu3 ul, .menu4 ul{
         align-items: center;
         justify-content: center;
         flex-direction: column;
     }
    
-    .menu ul li a, .menu2 ul li a{
+    .menu ul li a, .menu2 ul li a, .menu3 ul li a, .menu4 ul li a{
         font-weight: 600;
         color: white;
         border-color: white;
@@ -328,11 +514,11 @@ html, body {
         justify-content: center;
         align-items: center;
     }
-    .menu ul li a:hover, .menu2 ul li a:hover{
+    .menu ul li a:hover, .menu2 ul li a:hover, .menu3 ul li a:hover, .menu4 ul li a:hover{
         border-top: 1px solid white;
         border-bottom: 1px solid white;
     }
-    .wrapper{
+    .wrapper, .wrapper3, .wrapper4{
         background-image: linear-gradient(rgba(0,0,0,0.3),rgba(0,0,0,0.3)),url(mobile-media/bgdmisu.jpg);
         margin-left: 0px;
         margin-right: 0px;
@@ -340,24 +526,26 @@ html, body {
         
         
     }
-    .container1, .container2{
+    .container1, .container2, .container3, .container4{
         grid-template-rows: 10% 5% 75% 10%;
+        
     }
+    
     
     .wrapper h1{
         font-size: 80px;
     }
-    .menu .fa-bars, .menu2 .fa-bars2{
+    .menu .fa-bars, .menu2 .fa-bars2, .menu3 .fa-bars3, .menu4 .fa-bars4{
         display: block;
     }
-    .menu, .menu2{
+    .menu, .menu2, .menu3, .menu4{
         position: relative;
     }
-    .menu ul, .menu2 ul{
+    .menu ul, .menu2 ul, .menu3 ul, .menu4 ul{
         display: none;
         position: absolute;
     }
-    .menu:hover ul, .menu2:hover ul{
+    .menu:hover ul, .menu2:hover ul, .menu3:hover ul, .menu4:hover ul{
         display: flex;
         transition: 0.5s;
         color: white;
@@ -367,7 +555,7 @@ html, body {
         margin-top: 115px;
     }
     
-    .menu:hover .fa-bars, .menu2:hover .fa-bars2{
+    .menu:hover .fa-bars, .menu2:hover .fa-bars2, .menu3:hover .fa-bars3, .menu4:hover .fa-bars4{
         transform: rotate(90deg);
         transition: 0.5s;
     }
@@ -378,15 +566,7 @@ html, body {
         overflow: auto;
     }
     .lightbox{
-        background-color: rgba(0,0,0,0.7);
-        display: flex;
-        justify-content: center;
-        align-items: center;
         
-        height: 80%;
-        width: 100%;
-    }
-    .photos{
         display: flex;
         justify-content: center;
         align-items: center;
@@ -394,90 +574,83 @@ html, body {
         height: 90%;
         width: 100%;
     }
+    .photos{
+        
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        height: 90%;
+        width: 100%;
+        
+    }
     
     .photos img{
-        display: none;
+        display: block;
         padding: 0;
-        margin: 0;
-        height: 100%;
-        width: auto;
+        margin-bottom: 20px;
+        
+        height: auto;
+        width: 90%;
        
     }
     
-    #pic1:target {
-        display: block;
-    }
-    #pic2:target{
-        display: block;
-        height: auto;
-        width: 90%;
-    }
-    #pic3:target{
-        display: block;
-    }
-    #pic4:target{
-        display: block;
-        height: auto;
-        width: 90%;
-    }
-    #pic5:target{
-        display: block;
-    }
-    #pic6:target{
-        display: block;
-        height: auto;
-        width: 90%;
-    }
-    #pic7:target{
-        display: block;
-    }
-    #pic8:target{
-        display: block;
-        height: auto;
-        width: 90%;
-    }
-    #pic9:target{
-        display: block;
-    }
-    #pic10:target{
-        display: block;
-    }
-    #pic11:target{
-        display: block;
-    }
-    #pic12:target{
-        display: block;
-    }
-    #pic13:target{
-        display: block;
-    }
-    #pic14:target{
-        display: block;
-    }
     
-    .thumbnails{
-        margin-right: 10px;
-        display: flex;
-        justify-content: flex-start;
-        align-items: center;
-        background-color: rgba(255, 255, 255, 0.1);
-        height: 20%;
-        width: 100%;
-        overflow: auto;
-    }
-    .thumbnails img{  
-        margin-right: 10px;
-        width: auto;
-        height: 70%;
-    }
-    .thumbnails a{
-        margin: 5px;
-    }
      html, body {
         margin: 0;
         height: 100%;
         overflow: hidden;
     }
+    .wrapper3{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .wrapper3 .contact{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        height: 90%;
+        width: 80%;
+        background-color: transparent;
+        border-radius: 25px;
+    }
+    .wrapper3 .contact form{
+        display: flex;
+        width: 90%;
+        flex-direction: column;
+    }
+    input[type=text], select{
+        height: 50px;
+        font-size: 18px;
+        font-family: sans-serif;
+        border-radius: 5px;
+    }
+    label{
+        color: white;
+        font-size: 20px;
+        font-family: sans-serif;
+    }
+    textarea{
+        font-size: 18px;
+        font-family: sans-serif;
+        border-radius: 5px;
+    }
+    input[type=submit] {
+        background-color: transparent;
+        font-size: 20px;
+        color: white;
+        font-family: sans-serif;
+        border: 2px solid white;
+        border-radius: 25px;
+        padding: 10px 20px;
+      }
+      input[type=submit]:hover{
+          background-color: rgba(0, 0, 0, 0.685);
+      }
+
 }
 
 
