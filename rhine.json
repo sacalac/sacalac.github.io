@@ -1,0 +1,10 @@
+[
+  {"town":"Basel","km":170,"lat":47.5596,"lon":7.5886,"locks_to_next":0},
+  {"town":"Rheinfelden","km":149.5,"lat":47.5547,"lon":7.7968,"locks_to_next":0},
+  {"town":"Mannheim","km":425,"lat":49.4875,"lon":8.4660,"locks_to_next":0},
+  {"town":"Mainz","km":500,"lat":49.9935,"lon":8.2417,"locks_to_next":0},
+  {"town":"Koblenz","km":590,"lat":50.3569,"lon":7.5889,"locks_to_next":1},
+  {"town":"Cologne","km":685,"lat":50.9375,"lon":6.9603,"locks_to_next":0},
+  {"town":"Duisburg","km":780,"lat":51.4351,"lon":6.7627,"locks_to_next":0},
+  {"town":"Rotterdam","km":1000,"lat":51.9244,"lon":4.4777,"locks_to_next":0}
+]
