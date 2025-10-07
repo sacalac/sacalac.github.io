@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inland River Navigation</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+  html, body, #map { height: 100%; margin: 0; padding: 0; }
+  #controls { position: absolute; top: 10px; left: 10px; z-index: 1000; background: white; padding: 10px; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.3);}
+</style>
+</head>
+<body>
+
+<div id="map"></div>
+<div id="controls">
+  <input type="text" id="city" placeholder="Enter destination city" />
+  <button id="routeBtn">Show Route</button>
+  <div id="info"></div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+
+// --- Map setup ---
+const map = L.map('map').setView([50.1109, 8.6821], 12);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+  attribution: '&copy; OpenStreetMap',
+  maxZoom: 19
+}).addTo(map);
+
+L.tileLayer('https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png',{
+  attribution: 'OpenSeaMap',
+  maxZoom: 18
+}).addTo(map);
+
+// --- Boat marker ---
+const boatIcon = L.icon({
+  iconUrl: 'https://cdn-icons-png.flaticon.com/512/1532/1532623.png', // boat icon
+  iconSize: [32,32],
+  iconAnchor: [16,16]
+});
+
+let boatMarker = L.marker([50.1109,8.6821], {icon: boatIcon}).addTo(map);
+
+// --- Trail removed (per your request) ---
+
+// --- Real-time GPS ---
+let currentLatLng = null;
+if('geolocation' in navigator){
+  navigator.geolocation.watchPosition(pos=>{
+    const lat = pos.coords.latitude;
+    const lon = pos.coords.longitude;
+    currentLatLng = [lat, lon];
+    boatMarker.setLatLng(currentLatLng);
+    map.setView(currentLatLng, 15);
+  }, err=>console.error(err), {enableHighAccuracy:true});
+}else{
+  alert('Geolocation not supported.');
+}
+
+// --- Simple city database with lat/lon & Rhine km ---
+const cities = {
+  "Basel": {lat:47.5596, lon:7.5886, km:0},
+  "Rheinfelden": {lat:47.559, lon:7.828, km:37},
+  "Strasbourg": {lat:48.5734, lon:7.7521, km:150},
+  "Mainz": {lat:50.000, lon:8.270, km:520},
+  "Koblenz": {lat:50.356, lon:7.590, km:600},
+  "Cologne": {lat:50.9375, lon:6.9603, km:700},
+  "Duisburg": {lat:51.4344, lon:6.7623, km:780}
+};
+
+// Sample locks at Rhine km markers
+const locks = [37, 150, 520, 600, 700]; // simplify
+
+let routeLine = null;
+
+document.getElementById('routeBtn').addEventListener('click', ()=>{
+  const cityName = document.getElementById('city').value;
+  const dest = cities[cityName];
+  if(!dest){
+    alert('City not in database');
+    return;
+  }
+  if(!currentLatLng){
+    alert('Waiting for GPS...');
+    return;
+  }
+
+  // Remove previous line
+  if(routeLine) map.removeLayer(routeLine);
+
+  // Draw dotted line
+  routeLine = L.polyline([currentLatLng,[dest.lat,dest.lon]], {color:'red', dashArray:'10,10'}).addTo(map);
+  map.fitBounds(routeLine.getBounds(), {padding:[50,50]});
+
+  // Distance calculation (Haversine)
+  const R = 6371; // km
+  const lat1 = currentLatLng[0]*Math.PI/180;
+  const lat2 = dest.lat*Math.PI/180;
+  const dLat = (dest.lat - currentLatLng[0])*Math.PI/180;
+  const dLon = (dest.lon - currentLatLng[1])*Math.PI/180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1)*Math.cos(lat2)*Math.sin(dLon/2)**2;
+  const c = 2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+  const distance = R*c; // km
+
+  // Locks estimate
+  const currentKm = 0; // default, you can calculate nearest km if you have full river route
+  const destLocks = locks.filter(km => km > currentKm && km <= dest.km).length;
+
+  document.getElementById('info').innerHTML = `
+    Distance: ${distance.toFixed(1)} km<br>
+    Locks: ${destLocks}
+  `;
+});
+
+</script>
+</body>
+</html>
