@@ -3,79 +3,96 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Rhine Progress Tracker</title>
+<title>Rhine Live Tracker</title>
 <style>
-  body{font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial; margin:12px; color:#111}
-  .card{border-radius:12px;padding:12px;margin-bottom:12px;background:#f7f7f7}
-  label{display:block;margin-bottom:6px;font-weight:600}
-  input,select,button{font-size:16px;padding:8px;border-radius:8px;border:1px solid #ddd;width:100%;box-sizing:border-box}
-  button{background:#0366d6;color:white;border:none}
-  .row{display:flex;gap:8px}
-  .stats{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
-  .stat{background:white;padding:8px;border-radius:8px;flex:1;min-width:110px;box-shadow:0 1px 0 rgba(0,0,0,0.06)}
-  .progress-container{height:360px;width:80px;background:#eee;border-radius:8px;position:relative;margin:18px auto}
-  .progress-fill{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(#2ecc71,#1f9b4b);border-radius:8px 8px 0 0}
-  .lock-marker{position:absolute;left:-6px;width:92px;height:2px;background:#b5651d;}
-  .label-center{text-align:center;margin-top:8px}
-  .small{font-size:13px;color:#555}
-  .map-link{display:block;text-align:center;margin-top:8px;color:#0366d6}
+  :root{--accent:#0366d6;--bg:#f7f7f7;--card:#fff}
+  html,body{height:100%;margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial;background:white;color:#111}
+  .app{display:flex;flex-direction:row;gap:12px;padding:12px;height:100%;box-sizing:border-box}
+  .left {flex:1;min-width:200px}
+  .card{background:var(--bg);border-radius:12px;padding:12px;box-sizing:border-box;box-shadow:0 1px 0 rgba(0,0,0,0.06)}
+  h1{margin:0 0 8px 0;font-size:18px}
+  label{display:block;margin-top:8px;margin-bottom:6px;font-weight:600;font-size:14px}
+  input,select,button{font-size:16px;padding:10px;border-radius:10px;border:1px solid #ddd;width:100%;box-sizing:border-box}
+  button{background:var(--accent);color:white;border:none;margin-top:10px}
+  .stats{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .stat{background:var(--card);padding:10px;border-radius:10px;flex:1;min-width:120px;box-shadow:0 1px 0 rgba(0,0,0,0.04)}
+  .small{font-size:13px;color:#444}
+  .right {width:110px;display:flex;flex-direction:column;align-items:center}
+  .progress-rail{width:80px;height:70vh;max-height:720px;background:#eee;border-radius:12px;position:relative;overflow:visible;display:flex;align-items:flex-end}
+  .progress-fill{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(#2ecc71,#1f9b4b);border-radius:12px 12px 0 0;width:100%;height:0%;}
+  .lock-marker{position:absolute;left:-8px;width:96px;height:3px;background:#b5651d;border-radius:2px;box-shadow:0 1px 0 rgba(0,0,0,0.05)}
+  .progress-label{margin-top:8px;text-align:center;font-size:13px;color:#333}
+  .map-link{display:block;text-align:center;margin-top:8px;color:var(--accent);text-decoration:none}
+  .footer {font-size:12px;color:#666;margin-top:8px}
+  @media(max-width:640px){ .app{flex-direction:column} .right{width:100%;order:2} .left{order:1} .progress-rail{height:48vh} }
 </style>
 </head>
 <body>
-  <h2>Rhine Progress Tracker</h2>
+  <div class="app">
+    <div class="left">
+      <div class="card">
+        <h1>Rhine Live Tracker</h1>
+        <div class="small">Data: <span id="dataStatus">loading...</span></div>
 
-  <div class="card">
-    <label>Destination (town name)</label>
-    <input id="destInput" placeholder="e.g. Cologne"/>
-    <div style="height:8px"></div>
-    <label>Sample time to compute speed (seconds)</label>
-    <input id="sampleSec" value="15" />
-    <div style="height:8px"></div>
-    <button id="startBtn">Start tracking</button>
-  </div>
+        <label>Departure (leave blank to use current location)</label>
+        <input id="departureInput" placeholder="e.g. Basel (or leave empty)"/>
 
-  <div id="status" class="card small">Not started</div>
+        <label>Destination (town name)</label>
+        <input id="destInput" placeholder="e.g. Cologne"/>
 
-  <div id="output" style="display:none">
-    <div class="card">
-      <div class="label-center"><strong id="destName">Destination:</strong></div>
-      <div class="stats">
-        <div class="stat"><div class="small">Direction</div><div id="direction">—</div></div>
-        <div class="stat"><div class="small">Distance (river km)</div><div id="dist">—</div></div>
-        <div class="stat"><div class="small">ETA</div><div id="eta">—</div></div>
-        <div class="stat"><div class="small">Time left</div><div id="timeleft">—</div></div>
-        <div class="stat"><div class="small">Speed (km/h)</div><div id="speed">—</div></div>
-        <div class="stat"><div class="small">Locks left</div><div id="locks">—</div></div>
-      </div>
+        <label>Sample window (seconds) — smoothing for speed</label>
+        <input id="sampleSec" value="20" />
 
-      <div style="display:flex;justify-content:center;margin-top:8px">
-        <div class="progress-container" id="bar">
-          <div id="progressFill" class="progress-fill" style="height:0%"></div>
-          <!-- lock markers inserted here -->
+        <button id="startBtn">Start live tracking</button>
+
+        <div id="status" class="footer">Status: idle</div>
+
+        <div id="infoArea" style="display:none">
+          <div class="stats">
+            <div class="stat"><div class="small">Direction</div><div id="direction">—</div></div>
+            <div class="stat"><div class="small">Speed (km/h)</div><div id="speed">—</div></div>
+            <div class="stat"><div class="small">Distance (river km)</div><div id="dist">—</div></div>
+            <div class="stat"><div class="small">Time left</div><div id="timeleft">—</div></div>
+            <div class="stat"><div class="small">ETA</div><div id="eta">—</div></div>
+            <div class="stat"><div class="small">Locks left</div><div id="locks">—</div></div>
+          </div>
+
+          <a id="mapsBtn" class="map-link" target="_blank">Open route in Apple Maps</a>
         </div>
       </div>
-      <div class="label-center small">Progress along river (locks shown)</div>
+    </div>
 
-      <a id="mapsBtn" class="map-link" target="_blank">Open route in Apple Maps</a>
+    <div class="right">
+      <div class="progress-rail card" id="bar">
+        <div id="progressFill" class="progress-fill"></div>
+        <!-- lock markers added here -->
+      </div>
+      <div class="progress-label">
+        <div id="progressText">Progress: 0%</div>
+        <div class="small">Locks shown on bar</div>
+      </div>
     </div>
   </div>
 
 <script>
 (async function(){
-  const RHINE_JSON_URL = "./rhine.json"; // <--- rhine.json in same repo root
+  const RHINE_JSON_URL = "https://sacalac.github.io/data/rhine.json"; // your data path (must be public)
 
-  // load dataset
+  // Fetch dataset
   let rhine = [];
   try {
-    const r = await fetch(RHINE_JSON_URL);
-    rhine = await r.json();
+    const res = await fetch(RHINE_JSON_URL);
+    if(!res.ok) throw new Error("HTTP " + res.status);
+    rhine = await res.json();
     rhine.sort((a,b)=>a.km - b.km);
+    document.getElementById('dataStatus').innerText = `${rhine.length} points loaded`;
   } catch(e){
-    document.getElementById('status').innerText = "Failed to load Rhine dataset. Make sure rhine.json exists in repo root.";
+    document.getElementById('dataStatus').innerText = `Failed to load — ${e.message}`;
     console.error(e);
     return;
   }
 
+  // Helpers
   function haversineKm(lat1,lon1,lat2,lon2){
     const R=6371;
     const dLat=(lat2-lat1)*Math.PI/180;
@@ -85,17 +102,13 @@
     return R*c;
   }
 
-  function nearestPoint(lat,lon){
+  function nearestPointKm(lat,lon){
     let best = rhine[0], bd=Infinity;
     for(const p of rhine){
       const d=haversineKm(lat,lon,p.lat,p.lon);
       if(d<bd){bd=d;best=p;}
     }
     return best;
-  }
-
-  function riverDistanceKm(kmFrom, kmTo){
-    return Math.abs(kmTo - kmFrom);
   }
 
   function countLocksBetween(kmFrom, kmTo){
@@ -110,142 +123,236 @@
     return locks;
   }
 
-  // UI elements
-  const startBtn=document.getElementById('startBtn');
-  const statusEl=document.getElementById('status');
-  const output=document.getElementById('output');
-  const destNameEl=document.getElementById('destName');
-  const directionEl=document.getElementById('direction');
-  const distEl=document.getElementById('dist');
-  const etaEl=document.getElementById('eta');
-  const timeleftEl=document.getElementById('timeleft');
-  const speedEl=document.getElementById('speed');
-  const locksEl=document.getElementById('locks');
-  const fillEl=document.getElementById('progressFill');
-  const barEl=document.getElementById('bar');
-  const mapsBtn=document.getElementById('mapsBtn');
+  // UI refs
+  const startBtn = document.getElementById('startBtn');
+  const statusEl = document.getElementById('status');
+  const infoArea = document.getElementById('infoArea');
+  const directionEl = document.getElementById('direction');
+  const speedEl = document.getElementById('speed');
+  const distEl = document.getElementById('dist');
+  const timeleftEl = document.getElementById('timeleft');
+  const etaEl = document.getElementById('eta');
+  const locksEl = document.getElementById('locks');
+  const progressFill = document.getElementById('progressFill');
+  const progressText = document.getElementById('progressText');
+  const barEl = document.getElementById('bar');
+  const mapsBtn = document.getElementById('mapsBtn');
 
-  function formatTimeMinutes(mins){
-    if(mins<1) return "≤1 min";
-    const h=Math.floor(mins/60), m=Math.round(mins%60);
-    if(h>0) return h+"h "+m+"m";
-    return m+" min";
+  // moving window of GPS samples
+  let samples = []; // {lat, lon, ts}
+  let watchId = null;
+  let currentKm = null;
+  let departureKm = null;
+  let destKm = null;
+  let destObj = null;
+  let started = false;
+  let sampleWindowSec = 20;
+
+  function addSample(lat, lon){
+    const ts = Date.now();
+    samples.push({lat, lon, ts});
+    // drop older than sampleWindowSec * 1.5 to keep some buffer
+    const cutoff = Date.now() - (sampleWindowSec*1500);
+    samples = samples.filter(s => s.ts >= cutoff);
   }
 
-  startBtn.onclick = async ()=>{
-    const destName = document.getElementById('destInput').value.trim();
-    if(!destName){ alert("Please enter destination"); return; }
-    const sampleSec = Math.max(5, parseInt(document.getElementById('sampleSec').value)||15);
+  function calcSpeedKph(){
+    if(samples.length < 2) return NaN;
+    // compute total distance / total time across samples (first->last)
+    const first = samples[0], last = samples[samples.length-1];
+    const dist = haversineKm(first.lat, first.lon, last.lat, last.lon); // km
+    const timeH = (last.ts - first.ts) / 3600000; // hours
+    if(timeH <= 0) return NaN;
+    return dist / timeH;
+  }
 
-    statusEl.innerText = "Getting GPS permission...";
-    const dest = rhine.find(p=>p.town.toLowerCase() === destName.toLowerCase()) ||
-                 rhine.find(p=>p.town.toLowerCase().includes(destName.toLowerCase())) ||
-                 rhine.find(p=>p.town.toLowerCase().startsWith(destName.toLowerCase()));
-    if(!dest){ alert("Destination not found in dataset. Use exact town name from dataset."); return; }
+  function formatTimeMinutes(mins){
+    if(!isFinite(mins)) return "—";
+    if(mins < 1) return "≤1 min";
+    const h = Math.floor(mins/60), m = Math.round(mins % 60);
+    return h>0 ? `${h}h ${m}m` : `${m} min`;
+  }
 
-    destNameEl.innerText = "Destination: "+dest.town;
-
-    statusEl.innerText = "Taking first GPS sample...";
-    const pos1 = await new Promise((res,rej)=> navigator.geolocation.getCurrentPosition(p=>res(p.coords),err=>rej(err), {enableHighAccuracy:true, timeout:15000}));
-    statusEl.innerText = `Waiting ${sampleSec}s to sample movement... Keep device steady on deck.`;
-    await new Promise(r=>setTimeout(r, sampleSec*1000));
-    statusEl.innerText = "Taking second GPS sample...";
-    const pos2 = await new Promise((res,rej)=> navigator.geolocation.getCurrentPosition(p=>res(p.coords),err=>rej(err), {enableHighAccuracy:true, timeout:15000}));
-
-    const moved = haversineKm(pos1.latitude,pos1.longitude,pos2.latitude,pos2.longitude);
-    const timeHours = sampleSec / 3600;
-    let speedKph = moved / timeHours;
-    if (!isFinite(speedKph) || speedKph < 0.5) speedKph = 10;
-
-    const near = nearestPoint(pos2.latitude,pos2.longitude);
-    const currentKm = near.km;
-
-    const distKm = riverDistanceKm(currentKm, dest.km);
-    const direction = (dest.km > currentKm) ? "Downstream" : "Upstream";
-    const travelHours = distKm / speedKph;
-    const travelMins = travelHours * 60;
-    const eta = new Date(Date.now() + travelMins*60000);
-
-    const locksLeft = countLocksBetween(currentKm, dest.km);
-
-    const riverStartKm = rhine[0].km;
-    const riverEndKm = rhine[rhine.length-1].km;
-    let progressFraction;
-    if(direction === "Downstream"){
-      progressFraction = (currentKm - riverStartKm) / (riverEndKm - riverStartKm);
-    } else {
-      progressFraction = (riverEndKm - currentKm) / (riverEndKm - riverStartKm);
-    }
-    progressFraction = Math.max(0, Math.min(1, progressFraction));
-
-    directionEl.innerText = direction;
-    distEl.innerText = distKm.toFixed(1) + " km";
-    etaEl.innerText = eta.toLocaleTimeString();
-    timeleftEl.innerText = formatTimeMinutes(travelMins);
-    speedEl.innerText = speedKph.toFixed(1) + " km/h";
-    locksEl.innerText = locksLeft;
-    fillEl.style.height = (progressFraction*100) + "%";
-
+  function clearLockMarkers(){
     Array.from(barEl.querySelectorAll('.lock-marker')).forEach(n=>n.remove());
-    if(locksLeft>0){
-      let start = currentKm, end = dest.km;
-      let forward = (dest.km > currentKm);
-      let locksPositions = [];
-      if(forward){
-        for(let i=0;i<rhine.length;i++){
-          const p = rhine[i];
-          if(p.km >= start && p.km <= end && (p.locks_to_next||0)>0){
-            const nextKm = (i+1<rhine.length)? rhine[i+1].km : end;
-            const lockCount = p.locks_to_next || 0;
-            for(let k=1;k<=lockCount;k++){
-              const lockKm = p.km + (k/(lockCount+1))*(nextKm - p.km);
-              locksPositions.push(lockKm);
-            }
-          }
-        }
-      } else {
-        for(let i=rhine.length-1;i>=0;i--){
-          const p = rhine[i];
-          if(p.km <= start && p.km >= end && (p.locks_to_next||0)>0){
-            const prevKm = (i-1>=0)? rhine[i-1].km : end;
-            const lockCount = p.locks_to_next || 0;
-            for(let k=1;k<=lockCount;k++){
-              const lockKm = p.km - (k/(lockCount+1))*(p.km - prevKm);
-              locksPositions.push(lockKm);
-            }
-          }
-        }
+  }
+
+  function drawLocksBetween(startKm, endKm){
+    clearLockMarkers();
+    if(!Number.isFinite(startKm) || !Number.isFinite(endKm)) return;
+    const s = Math.min(startKm, endKm), e = Math.max(startKm, endKm);
+    // gather lock km positions from rhine dataset (expand locks_to_next into approximate positions)
+    const lockKms = [];
+    for(let i=0;i<rhine.length;i++){
+      const p = rhine[i];
+      const nextKm = (i+1<rhine.length)? rhine[i+1].km : p.km;
+      const lockCount = p.locks_to_next || 0;
+      for(let k=1;k<=lockCount;k++){
+        const lockKm = p.km + (k/(lockCount+1))*(nextKm - p.km);
+        if(lockKm >= s && lockKm <= e) lockKms.push(lockKm);
       }
-      locksPositions.forEach(lp=>{
-        const fractionAlongRiver = (lp - riverStartKm) / (riverEndKm - riverStartKm);
-        const topPx = (1 - fractionAlongRiver) * 360;
-        const el = document.createElement('div');
-        el.className = 'lock-marker';
-        el.style.top = Math.max(6, Math.min(352, topPx)) + 'px';
-        barEl.appendChild(el);
-      });
+    }
+    // draw markers
+    const riverStartKm = Math.min(rhine[0].km, rhine[rhine.length-1].km);
+    const riverEndKm = Math.max(rhine[0].km, rhine[rhine.length-1].km);
+    const segmentMin = Math.min(startKm, endKm);
+    const segmentMax = Math.max(startKm, endKm);
+    const segLen = segmentMax - segmentMin || 1;
+    for(const lk of lockKms){
+      // fraction along segment 0..1
+      const frac = (lk - segmentMin) / segLen;
+      // fraction along whole river for screen placement: we need placement relative to the current segment's height
+      // bar height in px:
+      const railHeight = barEl.clientHeight || 600;
+      // for vertical right bar where bottom = departure and top = destination when going downstream,
+      // we place marker at fraction along segment: bottom = 0 => topPx = (1 - frac)*railHeight
+      const topPx = (1 - frac) * railHeight;
+      const el = document.createElement('div');
+      el.className = 'lock-marker';
+      el.style.top = Math.max(6, Math.min(railHeight-6, topPx)) + 'px';
+      barEl.appendChild(el);
+    }
+  }
+
+  function updateProgressVisual(currKm, startKm, endKm){
+    if(!Number.isFinite(currKm) || !Number.isFinite(startKm) || !Number.isFinite(endKm)) {
+      progressFill.style.height = "0%";
+      progressText.innerText = "Progress: —";
+      return;
+    }
+    // progress fraction between start->end
+    const s = startKm, e = endKm;
+    // if start==end, set 100%
+    if(s === e){ progressFill.style.height = "100%"; progressText.innerText = "Progress: 100%"; return; }
+    // direction downstream if e > s
+    const downstream = (e > s);
+    let frac;
+    if(downstream){
+      frac = (currKm - s) / (e - s);
+    } else {
+      frac = (s - currKm) / (s - e);
+    }
+    frac = Math.max(0, Math.min(1, frac));
+    progressFill.style.height = (frac * 100) + "%";
+    progressText.innerText = `Progress: ${Math.round(frac*100)}%`;
+  }
+
+  // main update routine when new GPS arrives
+  async function onPosition(lat, lon){
+    addSample(lat, lon);
+    const nearest = nearestPointKm(lat, lon);
+    currentKm = nearest.km;
+
+    // if departure not set (empty), treat currentCp as departure
+    const depInput = document.getElementById('departureInput').value.trim();
+    if(!depInput){
+      departureKm = currentKm;
+    }
+    // else departureKm already set by user
+
+    // compute speed
+    const speed = calcSpeedKph();
+    // if speed NaN or tiny, keep last known or fallback
+    const speedKph = (isFinite(speed) && speed > 0.4) ? speed : (window._lastSpeed || 10);
+    window._lastSpeed = speedKph;
+
+    // compute river distance and ETA if dest defined
+    if(!Number.isFinite(departureKm) || !Number.isFinite(destKm)){
+      statusEl.innerText = "Waiting for departure & destination...";
+      return;
     }
 
-    mapsBtn.href = `http://maps.apple.com/?saddr=${pos2.latitude},${pos2.longitude}&daddr=${dest.lat},${dest.lon}`;
+    const direction = (destKm > departureKm) ? "Downstream" : "Upstream";
+
+    // compute remaining km from currentKm → destKm using river km difference
+    const remainingKm = Math.abs(destKm - currentKm);
+    const travelHours = remainingKm / speedKph;
+    const travelMins = travelHours * 60;
+    const eta = new Date(Date.now() + travelMins * 60000);
+
+    const locksLeft = countLocksBetween(currentKm, destKm);
+
+    // update UI
+    directionEl.innerText = direction;
+    speedEl.innerText = speedKph.toFixed(1) + " km/h";
+    distEl.innerText = remainingKm.toFixed(1) + " km";
+    timeleftEl.innerText = formatTimeMinutes(travelMins);
+    etaEl.innerText = isFinite(travelMins) ? eta.toLocaleTimeString() : "—";
+    locksEl.innerText = locksLeft;
+
+    // progress only between departureKm and destKm
+    updateProgressVisual(currentKm, departureKm, destKm);
+    drawLocksBetween(departureKm, destKm);
+
+    // maps link
+    mapsBtn.href = `http://maps.apple.com/?saddr=${lat},${lon}&daddr=${destObj.lat},${destObj.lon}`;
     mapsBtn.innerText = "Open route in Apple Maps";
 
-    const alarmMs = (travelMins - 30) * 60000;
-    if(alarmMs > 0){
-      statusEl.innerText = "Alarm will fire 30 min before arrival (while this page is open).";
-      setTimeout(()=> {
-        if (confirm("You will arrive in ~30 minutes. Open route?")) {
-          window.open(mapsBtn.href, "_blank");
-        } else {
-          alert("Approaching destination in ~30 min.");
-        }
-      }, alarmMs);
-    } else {
-      statusEl.innerText = "Less than 30 minutes to destination — alarm not scheduled.";
+    statusEl.innerText = "Live (updating)";
+    infoArea.style.display = 'block';
+  }
+
+  // event: start button
+  startBtn.addEventListener('click', async ()=>{
+    if(started){
+      // stop
+      if(watchId !== null) navigator.geolocation.clearWatch(watchId);
+      started = false;
+      startBtn.innerText = "Start live tracking";
+      statusEl.innerText = "Stopped";
+      return;
     }
 
-    output.style.display = 'block';
-    statusEl.innerText += " Done.";
-  };
+    // start
+    const destName = document.getElementById('destInput').value.trim();
+    const depName = document.getElementById('departureInput').value.trim();
+    sampleWindowSec = Math.max(5, parseInt(document.getElementById('sampleSec').value) || 20);
+
+    if(!destName){
+      alert("Please enter destination (town name).");
+      return;
+    }
+
+    // find dest in dataset with best match heuristics
+    destObj = rhine.find(p=>p.town.toLowerCase() === destName.toLowerCase()) ||
+              rhine.find(p=>p.town.toLowerCase().includes(destName.toLowerCase())) ||
+              rhine.find(p=>p.town.toLowerCase().startsWith(destName.toLowerCase()));
+    if(!destObj){ alert("Destination not found in rhine.json. Use exact town name or close match."); return; }
+    destKm = destObj.km;
+
+    if(depName){
+      const depObj = rhine.find(p=>p.town.toLowerCase() === depName.toLowerCase()) ||
+                     rhine.find(p=>p.town.toLowerCase().includes(depName.toLowerCase()));
+      if(!depObj){ alert("Departure not found in dataset. Leave blank to auto-detect from GPS."); return; }
+      departureKm = depObj.km;
+    } else {
+      departureKm = NaN; // will be set when first GPS sample arrives
+    }
+
+    // set UI
+    startBtn.innerText = "Stop tracking";
+    statusEl.innerText = "Getting GPS permission & starting...";
+    samples = [];
+    window._lastSpeed = undefined;
+
+    // use watchPosition for continuous updates
+    if(!('geolocation' in navigator)){
+      alert("Geolocation not available in this browser.");
+      return;
+    }
+    watchId = navigator.geolocation.watchPosition(pos => {
+      const c = pos.coords;
+      onPosition(c.latitude, c.longitude).catch(e=>console.error(e));
+    }, err => {
+      console.error(err);
+      statusEl.innerText = "Geolocation error: " + (err.message || err.code);
+    }, { enableHighAccuracy: true, maximumAge: 2000, timeout: 20000 });
+
+    started = true;
+  });
+
+  // prefill destination suggestions (first few towns) in console for debugging
+  console.log("First 10 towns:", rhine.slice(0,10).map(p=>p.town + " ("+p.km+")"));
 
 })();
 </script>
