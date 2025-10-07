@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>River Live Position</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <style>
+    html, body, #map {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    // Initialize the map
+    const map = L.map('map').setView([50.1109, 8.6821], 12);
+
+    // Base layer
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors',
+      maxZoom: 19
+    }).addTo(map);
+
+    // River overlay (OpenSeaMap)
+    L.tileLayer('https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png', {
+      attribution: 'OpenSeaMap',
+      maxZoom: 18
+    }).addTo(map);
+
+    // --- Triangle marker icon (simple SVG) ---
+    const triangleSVG = encodeURIComponent(`
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+        <polygon points="50,5 95,95 5,95" fill="#007bff" stroke="#003366" stroke-width="4"/>
+      </svg>
+    `);
+
+    const triangleIcon = L.icon({
+      iconUrl: 'data:image/svg+xml;charset=utf-8,' + triangleSVG,
+      iconSize: [40, 40],
+      iconAnchor: [20, 20]
+    });
+
+    // Marker for the current location
+    const shipMarker = L.marker([50.1109, 8.6821], { icon: triangleIcon }).addTo(map);
+
+    // --- Real-time GPS tracking ---
+    if ('geolocation' in navigator) {
+      navigator.geolocation.watchPosition(
+        pos => {
+          const lat = pos.coords.latitude;
+          const lon = pos.coords.longitude;
+          shipMarker.setLatLng([lat, lon]);
+
+          // Center map on first fix
+          if (!window._centeredOnce) {
+            map.setView([lat, lon], 15);
+            window._centeredOnce = true;
+          }
+        },
+        err => {
+          console.error(err);
+          alert('Error getting location: ' + err.message);
+        },
+        { enableHighAccuracy: true }
+      );
+    } else {
+      alert('Geolocation not supported by this browser.');
+    }
+  </script>
+  <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+<script>
+L.Control.geocoder({
+  defaultMarkGeocode: true
+}).addTo(map);
+</script>
+</body>
+</html>
