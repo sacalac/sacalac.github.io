@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Inland River Navigator — Pre-geocode helper</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+  html,body,#map { height:100%; margin:0; padding:0; }
+  #controls {
+    position: absolute; top: 10px; left: 10px; z-index: 1000;
+    background: rgba(255,255,255,0.97); padding: 10px; border-radius:8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25); width:320px; font-family: sans-serif;
+  }
+  #controls h3 { margin:0 0 8px 0; font-size:16px; }
+  select, button, input { width:100%; margin-top:6px; padding:8px; font-size:14px; box-sizing:border-box; }
+  .small { font-size:12px; color:#333; margin-top:6px; }
+  #progress { margin-top:8px; font-size:13px; }
+</style>
+</head>
+<body>
+<div id="map"></div>
+
+<div id="controls">
+  <h3>Inland River Navigator</h3>
+
+  <label><strong>Destination</strong></label>
+  <select id="destSelect"><option value="">-- choose destination --</option></select>
+  <button id="goBtn">Show Route</button>
+
+  <div class="small"><strong>Speed:</strong> <span id="speed">—</span> km/h</div>
+  <div class="small"><strong>Nearest town:</strong> <span id="nearest">—</span></div>
+  <div class="small"><strong>Remaining (Rhine km):</strong> <span id="remaining">—</span></div>
+
+  <hr/>
+
+  <div>
+    <button id="preGeocodeBtn">Pre-geocode all towns (safe)</button>
+    <div id="progress">Geocode cache size: <span id="cacheSize">0</span></div>
+    <button id="downloadBtn" style="margin-top:6px;">Download pre-geocoded JSON</button>
+    <div class="small">Note: pre-geocoding respects Nominatim rate limits (1.1s between requests). Only run once; results are cached in your browser.</div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+/* ============================
+  Towns list (name and Rhine km)
+  NOTE: This should contain the full list you uploaded.
+  For brevity in this example I include a short sample — when you paste
+  into your real index.html make sure the full 516 towns array is here.
+============================ */
+const towns = [
+  {"name":"Rheinfelden, Augst","km":149.1},
+  {"name":"Rheinfelden (Schweiz)","km":149.5},
+  {"name":"Rheinfelden (Deutschland)","km":149.5},
+  {"name":"Herten","km":153.0},
+  {"name":"Kaiseraugst","km":155.0},
+  {"name":"Wyhlen, Birsfelden","km":156.0},
+  {"name":"Pratteln","km":157.0},
+  {"name":"Muttenz","km":159.0},
+  {"name":"Grenzach","km":161.6},
+  {"name":"Birsfelden","km":163.0}
+  /* ... paste all towns here (the full exported list of 516 rows) ... */
+];
+
+/* ============================
+  Map setup
+============================ */
+const map = L.map('map').setView([50.1109,8.6821],12);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+  attribution:'&copy; OpenStreetMap', maxZoom:19
+}).addTo(map);
+
+L.tileLayer('https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png',{
+  attribution:'OpenSeaMap', maxZoom:18
+}).addTo(map);
+
+/* ============================
+  Ship icon (SVG) and marker
+============================ */
+const shipSvg = encodeURIComponent(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <g>
+    <path fill="#2b5d8a" d="M2 38c0 0 10-6 30-6s30 6 30 6v6c0 0-10 6-30 6S2 44 2 44v-6z"/>
+    <path fill="#fff" d="M20 26c0-6 6-10 12-10s12 4 12 10v6H20v-6z"/>
+    <rect x="28" y="18" width="8" height="8" rx="1" fill="#2b5d8a"/>
+    <path fill="#b0cfe6" d="M14 40c4-2 17-4 18-4s14 2 18 4v2c-4-1-17-3-18-3s-14 2-18 3v-2z" opacity="0.5"/>
+  </g>
+</svg>`);
+const shipIcon = L.icon({ iconUrl:`data:image/svg+xml;charset=utf-8,${shipSvg}`, iconSize:[48,48], iconAnchor:[24,24] });
+let shipMarker = L.marker([50.1109,8.6821], {icon:shipIcon}).addTo(map);
+let routeLine = null;
+
+/* ============================
+  UI elements
+============================ */
+const destSelect = document.getElementById('destSelect');
+const goBtn = document.getElementById('goBtn');
+const speedEl = document.getElementById('speed');
+const nearestEl = document.getElementById('nearest');
+const remainingEl = document.getElementById('remaining');
+const preGeocodeBtn = document.getElementById('preGeocodeBtn');
+const cacheSizeEl = document.getElementById('cacheSize');
+const downloadBtn = document.getElementById('downloadBtn');
+
+/* ============================
+  Populate destination dropdown
+============================ */
+(function populate(){
+  towns.sort((a,b)=>a.km-b.km);
+  for(const t of towns){
+    const opt = document.createElement('option');
+    opt.value = t.name;
+    opt.textContent = `${t.name} — km ${t.km}`;
+    destSelect.appendChild(opt);
+  }
+})();
+
+/* ============================
+  Geocode cache (localStorage)
+============================ */
+const GEOCACHE_KEY = 'inland_nav_geocache_v1';
+let geocache = {};
+try { geocache = JSON.parse(localStorage.getItem(GEOCACHE_KEY) || '{}'); } catch(e){ geocache = {}; }
+updateCacheSize();
+
+function updateCacheSize(){
+  cacheSizeEl.textContent = Object.keys(geocache).length;
+  try { localStorage.setItem(GEOCACHE_KEY, JSON.stringify(geocache)); } catch(e){ console.warn('localStorage full?'); }
+}
+
+/* ============================
+  Geocode single town via Nominatim
+  (returns {lat,lon} or null)
+  Note: we add "Rhein Germany" bias to increase chance of correct match.
+============================ */
+async function geocodeTownOnce(name){
+  if(geocache[name] !== undefined) return geocache[name]; // cached (could be null)
+  const q = encodeURIComponent(name + ' Rhein Germany');
+  const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${q}`;
+  try {
+    const res = await fetch(url, {headers:{'User-Agent':'InlandNavigator/1.0 (your-email@example.com)'}});
+    const arr = await res.json();
+    if(arr && arr.length){
+      const loc = {lat: parseFloat(arr[0].lat), lon: parseFloat(arr[0].lon)};
+      geocache[name] = loc;
+      updateCacheSize();
+      return loc;
+    } else {
+      geocache[name] = null;
+      updateCacheSize();
+      return null;
+    }
+  } catch(e){
+    console.error('geocode error', e);
+    return null;
+  }
+}
+
+/* ============================
+  Pre-geocode all towns politely (1.1s delay between requests)
+  This function runs in the browser, updates the cache, and shows progress.
+============================ */
+async function preGeocodeAll(progressCallback){
+  const total = towns.length;
+  let completed = 0;
+  for(const t of towns){
+    if(geocache[t.name] === undefined){
+      // eslint-disable-next-line no-await-in-loop
+      await geocodeTownOnce(t.name);
+      // respect rate limit: wait 1100 ms
+      // eslint-disable-next-line no-await-in-loop
+      await new Promise(r=>setTimeout(r, 1100));
+    }
+    completed++;
+    if(progressCallback) progressCallback(completed, total, t.name);
+  }
+  updateCacheSize();
+  return geocache;
+}
+
+/* ============================
+  Utility: Haversine distance (km)
+============================ */
+function haversineKm(aLat, aLon, bLat, bLon){
+  const R = 6371;
+  const toRad = x => x * Math.PI / 180;
+  const dLat = toRad(bLat - aLat);
+  const dLon = toRad(bLon - aLon);
+  const la1 = toRad(aLat), la2 = toRad(bLat);
+  const sinDlat = Math.sin(dLat/2), sinDlon = Math.sin(dLon/2);
+  const aa = sinDlat*sinDlat + Math.cos(la1)*Math.cos(la2)*sinDlon*sinDlon;
+  const c = 2*Math.atan2(Math.sqrt(aa), Math.sqrt(1-aa));
+  return R * c;
+}
+
+/* ============================
+  Find nearest town to position (uses cached geocoded towns only)
+  If none cached yet, returns the first town as fallback.
+============================ */
+function nearestTownFromPosition(lat, lon){
+  let nearest = null;
+  let dist = Infinity;
+  for(const t of towns){
+    const loc = geocache[t.name];
+    if(loc && loc.lat && loc.lon){
+      const d = haversineKm(lat, lon, loc.lat, loc.lon);
+      if(d < dist){ dist = d; nearest = {town: t, loc, dist_km: d}; }
+    }
+  }
+  if(!nearest) return {town: towns[0], loc: null, dist_km: null};
+  return nearest;
+}
+
+/* ============================
+  Destination handling: compute remaining Rhine-km and draw dotted route
+============================ */
+async function showRouteTo(destinationName, currentPos){
+  if(!destinationName) return alert('Choose a destination first');
+  const destTown = towns.find(t=>t.name === destinationName);
+  if(!destTown) return alert('Destination not found');
+
+  if(!currentPos) return alert('Waiting for GPS...');
+
+  // ensure dest geocoded (try quick)
+  let destLoc = geocache[destTown.name];
+  if(destLoc === undefined){
+    destLoc = await geocodeTownOnce(destTown.name);
+  }
+
+  // find nearest town (cached)
+  const nearest = nearestTownFromPosition(currentPos.lat, currentPos.lon);
+  nearestEl.textContent = nearest.town.name + (nearest.town.km !== undefined ? ` (km ${nearest.town.km})` : '');
+  const remaining = destTown.km - nearest.town.km;
+  const dir = remaining >= 0 ? 'downstream' : 'upstream';
+  remainingEl.textContent = `${Math.abs(remaining).toFixed(1)} km (${dir})`;
+
+  // draw dotted route if we have coords for dest
+  if(routeLine){ map.removeLayer(routeLine); routeLine = null; }
+  if(destLoc){
+    routeLine = L.polyline([[currentPos.lat, currentPos.lon], [destLoc.lat, destLoc.lon]], {color:'red', dashArray:'8,8', weight:3}).addTo(map);
+    map.fitBounds(routeLine.getBounds(), {padding:[60,60]});
+  } else {
+    alert('Destination coordinates not available yet - run pre-geocode or try again later.');
+  }
+}
+
+/* ============================
+  Geolocation watch (real-time)
+============================ */
+let lastPos = null;
+let lastTime = null;
+let currentPosition = null;
+
+if('geolocation' in navigator){
+  navigator.geolocation.watchPosition((p) => {
+    const lat = p.coords.latitude;
+    const lon = p.coords.longitude;
+    const now = Date.now();
+
+    shipMarker.setLatLng([lat, lon]);
+    if(!window._centeredOnce){ map.setView([lat, lon], 15); window._centeredOnce = true; }
+
+    // speed in km/h (use GPS if present else estimate)
+    let speedKmh = null;
+    if(p.coords.speed !== null && !isNaN(p.coords.speed)){
+      speedKmh = p.coords.speed * 3.6;
+    } else if(lastPos && lastTime){
+      const dkm = haversineKm(lastPos.lat, lastPos.lon, lat, lon);
+      const dtHours = (now - lastTime) / 3600000;
+      if(dtHours > 0) speedKmh = dkm / dtHours;
+    }
+    speedEl.textContent = speedKmh !== null ? speedKmh.toFixed(1) : '—';
+
+    lastPos = {lat, lon};
+    lastTime = now;
+    currentPosition = {lat, lon};
+
+    // update nearest town display opportunistically if cache allows
+    const nearestCached = nearestTownFromPosition(lat, lon);
+    if(nearestCached && nearestCached.town) {
+      nearestEl.textContent = `${nearestCached.town.name} (km ${nearestCached.town.km})`;
+    }
+
+  }, (err)=>{ console.error(err); alert('Geolocation error: ' + err.message); }, {enableHighAccuracy:true, maximumAge:1000, timeout:10000});
+} else {
+  alert('Geolocation not supported by your browser.');
+}
+
+/* ============================
+  Button handlers
+============================ */
+goBtn.addEventListener('click', ()=> showRouteTo(destSelect.value, currentPosition));
+
+preGeocodeBtn.addEventListener('click', async ()=>{
+  if(!confirm('This will geocode all towns using Nominatim with a polite 1.1s delay between requests. It may take several minutes. Proceed?')) return;
+  preGeocodeBtn.disabled = true;
+  let progressDiv = document.getElementById('progress');
+  progressDiv.textContent = 'Starting pre-geocode...';
+  await preGeocodeAll((done, total, name) => {
+    progressDiv.textContent = `Geocoding ${done}/${total}: ${name} ... (cached: ${Object.keys(geocache).length})`;
+    updateCacheSize();
+  });
+  progressDiv.textContent = 'Pre-geocode finished.';
+  preGeocodeBtn.disabled = false;
+  updateCacheSize();
+});
+
+downloadBtn.addEventListener('click', ()=>{
+  // Build a JSON object mapping town => {name,km,lat,lon}
+  const out = towns.map(t => {
+    const c = geocache[t.name] || null;
+    return {name: t.name, km: t.km, lat: c ? c.lat : null, lon: c ? c.lon : null};
+  });
+  const blob = new Blob([JSON.stringify(out, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'rhine_towns_geocoded.json';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+});
+
+/* ============================
+  On load: show cached size
+============================ */
+updateCacheSize();
+
+</script>
+</body>
+</html>
