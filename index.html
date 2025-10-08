@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>River Navigator — Full Rhine List</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <style>
+    html, body, #map { height:100%; margin:0; padding:0; }
+    #controls {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 1000;
+      background: rgba(255,255,255,0.97);
+      padding: 8px;
+      border-radius: 6px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+      font-family: sans-serif;
+      width: 320px;
+    }
+    select, button { width:100%; margin-top:6px; padding:8px; box-sizing:border-box; }
+    .small { font-size:13px; color:#222; margin-top:6px; }
+  </style>
+</head>
+<body>
+<div id="map"></div>
+
+<div id="controls">
+  <strong>Destination</strong>
+  <select id="destSelect"><option value="">-- choose destination --</option></select>
+  <button id="goBtn">Show Route</button>
+  <div class="small"><strong>Nearest town:</strong> <span id="nearest">—</span></div>
+  <div class="small"><strong>Remaining (Rhine km):</strong> <span id="remaining">—</span></div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const towns = [
+{"name":"Rheinfelden","km":150,"lat":47.5601,"lon":7.7872},
+{"name":"Augst","km":155,"lat":47.5339,"lon":7.7213},
+{"name":"Schleuse Augst","km":155.6,"lat":47.5339,"lon":7.7213},
+{"name":"Birsfelden","km":163,"lat":47.5529,"lon":7.6232},
+{"name":"Basel","km":167,"lat":47.5596,"lon":7.5886},
+{"name":"Weil am Rhein","km":171,"lat":47.5934,"lon":7.6198},
+{"name":"Huningue","km":170.5,"lat":47.5940,"lon":7.5820},
+{"name":"Istein","km":180,"lat":47.6670,"lon":7.5500},
+{"name":"Doppelschleuse Kembs","km":179.35,"lat":47.6670,"lon":7.5500},
+{"name":"Kembs","km":184,"lat":47.6670,"lon":7.5500},
+{"name":"Niffer","km":186,"lat":47.6670,"lon":7.5500},
+{"name":"Bellingen","km":189,"lat":47.6670,"lon":7.5500},
+{"name":"Ottmarsheim","km":195,"lat":47.6670,"lon":7.5500},
+{"name":"Doppelschleuse Ottmarsheim","km":194.35,"lat":47.6670,"lon":7.5500},
+{"name":"Chalampe","km":200,"lat":47.6670,"lon":7.5500},
+{"name":"Bantzenheim","km":202,"lat":47.6670,"lon":7.5500},
+{"name":"Zienken / Blödelsheim","km":204.5,"lat":47.6670,"lon":7.5500},
+{"name":"Schleuse Fessenheim","km":212.4,"lat":47.6670,"lon":7.5500},
+{"name":"Fessenheim / Nambsheim","km":211.5,"lat":47.6670,"lon":7.5500},
+{"name":"Geiswasser","km":219,"lat":47.6670,"lon":7.5500},
+
+{"name":"Worms","km":444,"lat":49.6320,"lon":8.3590},
+{"name":"Gernsheim","km":462,"lat":49.7390,"lon":8.4640},
+{"name":"Guntersblum","km":472,"lat":49.7350,"lon":8.4210},
+{"name":"Oppenheim","km":480,"lat":49.7800,"lon":8.3590},
+{"name":"Nierstein","km":482,"lat":49.7790,"lon":8.3410},
+{"name":"Nackenheim","km":487,"lat":49.7760,"lon":8.3140},
+{"name":"Laubenheim","km":492,"lat":49.9850,"lon":8.2640},
+{"name":"Mainz","km":497.5,"lat":49.9929,"lon":8.2473},
+{"name":"Gustavsburg / Mainz-Kastel","km":496.5,"lat":50.0070,"lon":8.2710},
+{"name":"Wiesbaden-Amöneburg / Biebrich","km":502,"lat":50.0500,"lon":8.2250},
+{"name":"Wiesbaden-Schierstein","km":506,"lat":50.0550,"lon":8.2040},
+{"name":"Eltville / Erbach","km":512,"lat":50.0330,"lon":8.1050},
+{"name":"Oestrich / Mittelheim / Winkel","km":517,"lat":50.0140,"lon":8.0900},
+{"name":"Geisenheim","km":523,"lat":50.0080,"lon":8.0000},
+{"name":"Rüdesheim","km":527,"lat":50.0000,"lon":7.9160},
+{"name":"Bingen","km":527.5,"lat":49.9740,"lon":7.9030},
+{"name":"Bingerbrück","km":530,"lat":49.9720,"lon":7.8890},
+{"name":"Assmannshausen","km":532,"lat":49.9720,"lon":7.8720},
+{"name":"Trechtingshausen","km":535,"lat":49.9660,"lon":7.8540},
+{"name":"Niederheimbach","km":539,"lat":49.9520,"lon":7.8100},
+{"name":"Lorch","km":540,"lat":49.9420,"lon":7.7800},
+{"name":"Lorchhausen","km":542,"lat":49.9360,"lon":7.7700},
+{"name":"Kaub","km":546,"lat":49.9180,"lon":7.7300},
+{"name":"Oberwesel","km":550,"lat":49.9400,"lon":7.7100},
+{"name":"St. Goar","km":556,"lat":50.1230,"lon":7.6950},
+{"name":"St. Goarshausen","km":556,"lat":50.1340,"lon":7.6780},
+{"name":"Wellmich","km":559,"lat":50.1400,"lon":7.6500},
+{"name":"Kestert","km":563,"lat":50.1500,"lon":7.6180},
+{"name":"Hirzenach","km":563,"lat":50.1480,"lon":7.6150},
+{"name":"Bad Salzig","km":565,"lat":50.1450,"lon":7.6050},
+{"name":"Kamp-Bornhofen","km":568,"lat":50.1420,"lon":7.5880},
+{"name":"Boppard","km":570,"lat":50.1390,"lon":7.5900},
+{"name":"Filsen","km":571.5,"lat":50.1360,"lon":7.5920},
+{"name":"Osterspai","km":575,"lat":50.1200,"lon":7.6000},
+{"name":"Spay","km":578,"lat":50.1180,"lon":7.6100},
+{"name":"Braubach","km":579.7,"lat":50.1100,"lon":7.6150},
+{"name":"Rhens","km":582,"lat":50.0980,"lon":7.6100},
+{"name":"Lahnstein","km":585,"lat":50.3560,"lon":7.5950},
+{"name":"Koblenz","km":592,"lat":50.3560,"lon":7.5890},
+{"name":"Vallendar","km":597,"lat":50.3810,"lon":7.5960},
+{"name":"Bendorf","km":598,"lat":50.3900,"lon":7.5960},
+{"name":"Engers","km":601,"lat":50.3970,"lon":7.5940},
+{"name":"Neuwied","km":608,"lat":50.4280,"lon":7.4650},
+{"name":"Andernach","km":611,"lat":50.4320,"lon":7.4120},
+{"name":"Leutesdorf","km":615,"lat":50.4660,"lon":7.4300},
+{"name":"Namedy","km":616,"lat":50.4660,"lon":7.4470},
+{"name":"Hammerstein","km":617,"lat":50.4690,"lon":7.4530},
+{"name":"Brohl","km":620.5,"lat":50.5120,"lon":7.3770},
+{"name":"Rheinbrohl","km":621.5,"lat":50.5170,"lon":7.3570},
+{"name":"Bad Hönningen","km":623.9,"lat":50.5340,"lon":7.3270},
+{"name":"Bad Breisig","km":625,"lat":50.5400,"lon":7.2900},
+{"name":"Linz","km":630,"lat":50.5560,"lon":7.2340},
+{"name":"Remagen","km":634,"lat":50.5670,"lon":7.1630},
+{"name":"Erpel","km":633.5,"lat":50.5680,"lon":7.1720},
+{"name":"Unkel","km":637,"lat":50.5830,"lon":7.2010},
+{"name":"Oberwinter","km":639,"lat":50.5900,"lon":7.2160},
+{"name":"Rolandseck","km":640,"lat":50.5970,"lon":7.2250},
+{"name":"Bad Honnef","km":641,"lat":50.6000,"lon":7.2340},
+{"name":"Rhöndorf","km":643,"lat":50.6130,"lon":7.2380},
+{"name":"Königswinter","km":645,"lat":50.6200,"lon":7.2380},
+{"name":"Bonn","km":653.5,"lat":50.7374,"lon":7.0982},
+
+{"name":"Mondorf / Hersel / Rheidt / Widdig","km":662,"lat":50.7370,"lon":7.1320},
+{"name":"Niederkassel","km":665,"lat":50.7379,"lon":7.1200},
+{"name":"Lülsdorf","km":668,"lat":50.7310,"lon":7.1100},
+{"name":"Wesseling","km":670,"lat":50.8100,"lon":6.9700},
+{"name":"Godorf","km":672,"lat":50.8200,"lon":6.9500},
+{"name":"Sürth","km":675,"lat":50.8700,"lon":6.9400},
+{"name":"Weiß","km":676,"lat":50.8700,"lon":6.9400},
+{"name":"Porz","km":679,"lat":50.8700,"lon":7.0000},
+{"name":"Köln (Cologne)","km":691,"lat":50.9375,"lon":6.9603},
+{"name":"Köln-Deutz","km":686,"lat":50.9400,"lon":6.9800},
+{"name":"Köln-Mülheim","km":692,"lat":50.9500,"lon":7.0000},
+{"name":"Köln-Niehl","km":696,"lat":50.9700,"lon":6.9500},
+{"name":"Köln-Merkenich","km":700,"lat":51.0000,"lon":6.9500},
+{"name":"Leverkusen","km":702,"lat":51.0450,"lon":7.0080},
+{"name":"Hitdorf","km":706,"lat":51.0150,"lon":6.9400},
+{"name":"Dormagen","km":711,"lat":51.0830,"lon":6.9100},
+{"name":"Monheim / Baumberg","km":713,"lat":51.0960,"lon":6.9280},
+{"name":"Zons","km":717,"lat":51.0900,"lon":6.8400},
+{"name":"Düsseldorf","km":736.5,"lat":51.2277,"lon":6.7735},
+{"name":"Benrath","km":722,"lat":51.1600,"lon":6.8500},
+{"name":"Reisholz","km":723,"lat":51.1500,"lon":6.7800},
+{"name":"Hamm","km":738,"lat":51.2130,"lon":6.7970},
+{"name":"Oberkassel","km":744,"lat":50.7350,"lon":7.1230},
+{"name":"Kaiserswerth","km":756,"lat":51.2730,"lon":6.7920},
+{"name":"Duisburg","km":776.5,"lat":51.4344,"lon":6.7623},
+{"name":"Rheinhausen","km":778,"lat":51.4800,"lon":6.7000},
+{"name":"Ruhrort","km":779,"lat":51.5200,"lon":6.7400},
+{"name":"Homberg","km":780,"lat":51.5000,"lon":6.7700},
+{"name":"Walsum","km":792,"lat":51.5100,"lon":6.8200},
+{"name":"Orsoy","km":793,"lat":51.5800,"lon":6.6200},
+{"name":"Götterswickerhamm","km":800,"lat":51.5900,"lon":6.5800},
+{"name":"Mehrum","km":803,"lat":52.2200,"lon":10.0500},
+{"name":"Rheinberg","km":805,"lat":51.6000,"lon":6.6500},
+{"name":"Wesel","km":813,"lat":51.6640,"lon":6.6180},
+{"name":"Bislich","km":824,"lat":51.7000,"lon":6.5000},
+{"name":"Xanten","km":825,"lat":51.6570,"lon":6.4430},
+{"name":"Rees","km":838,"lat":51.7400,"lon":6.6500},
+{"name":"Grieth","km":845,"lat":51.8000,"lon":6.7500},
+{"name":"Emmerich","km":852,"lat":51.8330,"lon":6.2500},
+{"name":"Spijk","km":858,"lat":51.8670,"lon":6.1000},
+{"name":"Lobith / Tolkamer","km":861,"lat":51.8330,"lon":6.1300},
+{"name":"Millingen","km":867,"lat":51.8500,"lon":6.1700},
+{"name":"Nijmegen","km":884,"lat":51.8425,"lon":5.8528},
+{"name":"Tiel","km":915,"lat":51.8860,"lon":5.4370},
+{"name":"Zaltbommel","km":936,"lat":51.8100,"lon":5.2500},
+{"name":"Woudrichem","km":951,"lat":51.7480,"lon":5.0980},
+{"name":"Gorinchem","km":954,"lat":51.8360,"lon":4.9740},
+{"name":"Sliedrecht","km":969,"lat":51.8310,"lon":4.7200},
+{"name":"Dordrecht","km":978,"lat":51.8133,"lon":4.6900},
+{"name":"Papendrecht","km":974,"lat":51.8250,"lon":4.6700},
+{"name":"Kinderdijk","km":984,"lat":51.8950,"lon":4.6500},
+{"name":"Ridderkerk","km":984,"lat":51.8790,"lon":4.6200},
+{"name":"Rotterdam","km":1002.5,"lat":51.9225,"lon":4.4792},
+{"name":"Vlaardingen","km":1011,"lat":51.9140,"lon":4.3240},
+{"name":"Maassluis","km":1019,"lat":51.9180,"lon":4.2780},
+{"name":"Hoek van Holland","km":1031.5,"lat":51.9850,"lon":4.1200}
+];
+
+const map = L.map('map').setView([50.1109,8.6821],12);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+  attribution:'&copy; OpenStreetMap', maxZoom:19
+}).addTo(map);
+
+L.tileLayer('https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png',{
+  attribution:'OpenSeaMap', maxZoom:18
+}).addTo(map);
+
+const triangleSVG = encodeURIComponent(`
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+    <polygon points="50,5 95,95 5,95" fill="#007bff" stroke="#003366" stroke-width="4"/>
+  </svg>
+`);
+const triangleIcon = L.icon({
+  iconUrl: 'data:image/svg+xml;charset=utf-8,' + triangleSVG,
+  iconSize: [40,40],
+  iconAnchor: [20,20]
+});
+
+const shipMarker = L.marker([50.1109,8.6821], {icon: triangleIcon}).addTo(map);
+let routeLine = null;
+
+const destSelect = document.getElementById('destSelect');
+towns.sort((a,b)=> (a.km||0) - (b.km||0));
+for(const t of towns){
+  const opt = document.createElement('option');
+  opt.value = t.name;
+  const kmText = t.km !== null && t.km !== undefined ? `km ${t.km}` : 'km ?';
+  opt.textContent = `${t.name} — ${kmText}`;
+  destSelect.appendChild(opt);
+}
+
+function haversineKm(aLat,aLon,bLat,bLon){
+  const R = 6371;
+  const toRad = x => x * Math.PI/180;
+  const dLat = toRad(bLat - aLat);
+  const dLon = toRad(bLon - aLon);
+  const la1 = toRad(aLat), la2 = toRad(bLat);
+  const sinDlat = Math.sin(dLat/2), sinDlon = Math.sin(dLon/2);
+  const aa = sinDlat*sinDlat + Math.cos(la1)*Math.cos(la2)*sinDlon*sinDlon;
+  const c = 2*Math.atan2(Math.sqrt(aa), Math.sqrt(1-aa));
+  return R * c;
+}
+
+function findNearestTown(lat, lon){
+  let nearest = null;
+  let best = Infinity;
+  for(const t of towns){
+    if(t.lat == null || t.lon == null) continue;
+    const d = haversineKm(lat, lon, t.lat, t.lon);
+    if(d < best){ best = d; nearest = t; }
+  }
+  return nearest;
+}
+
+function showRoute(destName, currentPos){
+  if(!destName) return alert('Choose a destination');
+  const dest = towns.find(t=>t.name===destName);
+  if(!dest) return alert('Destination not found');
+
+  if(!currentPos) return alert('Waiting for GPS position...');
+
+  const nearest = findNearestTown(currentPos.lat, currentPos.lon);
+  const nearestText = nearest ? `${nearest.name} (km ${nearest.km})` : '—';
+  document.getElementById('nearest').textContent = nearestText;
+
+  const remaining = (dest.km != null && nearest && nearest.km != null) ? (dest.km - nearest.km) : null;
+  const dir = remaining != null ? (remaining>=0 ? 'downstream' : 'upstream') : '';
+  document.getElementById('remaining').textContent = remaining != null ? Math.abs(remaining).toFixed(1) + ' km ('+dir+')' : '—';
+
+  if(routeLine) { map.removeLayer(routeLine); routeLine = null; }
+  if(dest.lat != null && dest.lon != null){
+    routeLine = L.polyline([[currentPos.lat, currentPos.lon],[dest.lat, dest.lon]], {color:'red', dashArray:'8,8', weight:3}).addTo(map);
+    map.fitBounds(routeLine.getBounds(), {padding:[60,60]});
+  } else {
+    alert('Destination coordinates not available.');
+  }
+}
+
+let currentPosition = null;
+if('geolocation' in navigator){
+  navigator.geolocation.watchPosition(p=>{
+    const lat = p.coords.latitude;
+    const lon = p.coords.longitude;
+    shipMarker.setLatLng([lat, lon]);
+    currentPosition = {lat, lon};
+    if(!window._centeredOnce){ map.setView([lat, lon], 15); window._centeredOnce = true; }
+  }, err=>{
+    console.error(err);
+    alert('Geolocation error: ' + err.message);
+  }, {enableHighAccuracy:true, maximumAge:1000, timeout:10000});
+} else {
+  alert('Geolocation not supported.');
+}
+
+document.getElementById('goBtn').addEventListener('click', ()=> showRoute(destSelect.value, currentPosition));
+
+</script>
+</body>
+</html>
