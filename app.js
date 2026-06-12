@@ -1,29 +1,23 @@
-mapboxgl.accessToken = 'YOUR_MAPBOX_TOKEN';
+const map = L.map('map').setView([47.5596, 7.5886], 10);
 
-const map = new mapboxgl.Map({
-    container: 'map',
-    style: 'mapbox://styles/mapbox/outdoors-v12',
-    center: [7.5886, 47.5596],
-    zoom: 10
-});
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap contributors'
+}).addTo(map);
+
+let userMarker = null;
 
 navigator.geolocation.watchPosition(
     (position) => {
-
-        const lng = position.coords.longitude;
         const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
 
-        map.flyTo({
-            center: [lng, lat],
-            zoom: 14
-        });
+        map.setView([lat, lon], 14);
 
-        if (!window.userMarker) {
-            window.userMarker = new mapboxgl.Marker()
-                .setLngLat([lng, lat])
-                .addTo(map);
+        if (!userMarker) {
+            userMarker = L.marker([lat, lon]).addTo(map);
         } else {
-            window.userMarker.setLngLat([lng, lat]);
+            userMarker.setLatLng([lat, lon]);
         }
     },
     (error) => {
