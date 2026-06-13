@@ -4,6 +4,10 @@ fetch('rhine_points.json')
     .then(r => r.json())
     .then(data => {
         rhinePoints = data;
+        console.log("Loaded Rhine points:", rhinePoints.length);
+    })
+    .catch(err => {
+        console.error("Failed to load rhine_points.json", err);
     });
 
 function distance(lat1, lon1, lat2, lon2) {
@@ -18,7 +22,10 @@ function distance(lat1, lon1, lat2, lon2) {
         Math.cos(lat2 * Math.PI / 180) *
         Math.sin(dLon / 2) ** 2;
 
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * 2 * Math.atan2(
+        Math.sqrt(a),
+        Math.sqrt(1 - a)
+    );
 }
 
 function nearestRhinePoint(lat, lon) {
@@ -46,9 +53,12 @@ function nearestRhinePoint(lat, lon) {
 
 const map = L.map('map').setView([50.0, 7.0], 6);
 
-L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors'
-}).addTo(map);
+L.tileLayer(
+    'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+    {
+        attribution: '&copy; OpenStreetMap contributors'
+    }
+).addTo(map);
 
 let marker = null;
 let firstFix = true;
@@ -57,10 +67,16 @@ const info = L.control({ position: 'topright' });
 
 info.onAdd = function () {
     this._div = L.DomUtil.create('div');
+
     this._div.style.background = 'white';
     this._div.style.padding = '10px';
     this._div.style.borderRadius = '5px';
-    this._div.innerHTML = 'Waiting for GPS...';
+    this._div.style.boxShadow =
+        '0 0 5px rgba(0,0,0,0.3)';
+
+    this._div.innerHTML =
+        'Waiting for GPS...';
+
     return this._div;
 };
 
@@ -71,41 +87,55 @@ navigator.geolocation.watchPosition(
 
         const lat = position.coords.latitude;
         const lon = position.coords.longitude;
-        const speed = position.coords.speed || 0;
+        const speed =
+            position.coords.speed || 0;
 
-        const nearest = nearestRhinePoint(lat, lon);
+        const nearest =
+            nearestRhinePoint(lat, lon);
 
-if (nearest) {
-    document.getElementById("info").innerHTML = `
-    <b>TEST</b><br>
-    Rhine km: 592<br>
-    Place: Koblenz
-`;
-}
+        if (nearest) {
+
+            info._div.innerHTML = `
+                <b>Rhine Navigation</b><br>
+                Rhine km: ${nearest.km}<br>
+                Place: ${nearest.name}<br>
+                Speed: ${(speed * 3.6).toFixed(1)} km/h<br>
+                Lat: ${lat.toFixed(5)}<br>
+                Lon: ${lon.toFixed(5)}
+            `;
+        }
 
         if (!marker) {
-            marker = L.marker([lat, lon]).addTo(map);
+
+            marker =
+                L.marker([lat, lon])
+                .addTo(map);
+
         } else {
+
             marker.setLatLng([lat, lon]);
+
         }
 
         if (firstFix) {
-            map.setView([lat, lon], 15);
+
+            map.setView(
+                [lat, lon],
+                15
+            );
+
             firstFix = false;
         }
 
-        info._div.innerHTML = `
-            <b>Your Position</b><br>
-            Lat: ${lat.toFixed(5)}<br>
-            Lon: ${lon.toFixed(5)}<br>
-            Speed: ${(speed * 3.6).toFixed(1)} km/h
-        `;
-
     },
     (error) => {
-        alert(error.message);
+
+        console.error(error);
+
     },
     {
-        enableHighAccuracy: true
+        enableHighAccuracy: true,
+        maximumAge: 1000,
+        timeout: 10000
     }
 );
