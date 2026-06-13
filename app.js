@@ -77,11 +77,10 @@ navigator.geolocation.watchPosition(
 
 if (nearest) {
     document.getElementById("info").innerHTML = `
-        <b>Rhine Navigation</b><br>
-        Rhine km: ${nearest.km}<br>
-        Place: ${nearest.name}<br>
-        Speed: ${(speed * 3.6).toFixed(1)} km/h
-    `;
+    <b>TEST</b><br>
+    Rhine km: 592<br>
+    Place: Koblenz
+`;
 }
 
         if (!marker) {
