@@ -1,10 +1,12 @@
 [
   {"name":"Basel","km":167,"lat":47.5596,"lon":7.5886},
-  {"name":"Mainz","km":500,"lat":50.0000,"lon":8.2711},
+  {"name":"Strasbourg","km":330,"lat":48.5734,"lon":7.7521},
+  {"name":"Mainz","km":500,"lat":49.9929,"lon":8.2473},
   {"name":"Koblenz","km":592,"lat":50.3569,"lon":7.5889},
   {"name":"Bonn","km":654,"lat":50.7374,"lon":7.0982},
   {"name":"Cologne","km":689,"lat":50.9375,"lon":6.9603},
   {"name":"Düsseldorf","km":734,"lat":51.2277,"lon":6.7735},
   {"name":"Duisburg","km":780,"lat":51.4344,"lon":6.7623},
+  {"name":"Nijmegen","km":870,"lat":51.8426,"lon":5.8518},
   {"name":"Rotterdam","km":1000,"lat":51.9244,"lon":4.4777}
 ]
