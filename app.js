@@ -1,29 +1,36 @@
-const map = L.map('map').setView([47.5596, 7.5886], 10);
+const map = L.map('map').setView([50.0, 7.0], 6);
 
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
     attribution: '&copy; OpenStreetMap contributors'
 }).addTo(map);
 
-let userMarker = null;
+let marker = null;
+let firstFix = true;
 
 navigator.geolocation.watchPosition(
     (position) => {
+
         const lat = position.coords.latitude;
         const lon = position.coords.longitude;
 
-        map.setView([lat, lon], 14);
-
-        if (!userMarker) {
-            userMarker = L.marker([lat, lon]).addTo(map);
+        if (!marker) {
+            marker = L.marker([lat, lon]).addTo(map);
         } else {
-            userMarker.setLatLng([lat, lon]);
+            marker.setLatLng([lat, lon]);
         }
+
+        if (firstFix) {
+            map.setView([lat, lon], 15);
+            firstFix = false;
+        }
+
     },
     (error) => {
-        console.log(error);
+        alert("GPS Error: " + error.message);
     },
     {
-        enableHighAccuracy: true
+        enableHighAccuracy: true,
+        maximumAge: 1000,
+        timeout: 10000
     }
 );
