@@ -1,6 +1,6 @@
+let rhinePoints = [];
 let places = [];
 let selectedDestination = null;
-let rhinePoints = [];
 
 fetch('rhine.geojson')
     .then(r => r.json())
@@ -16,10 +16,76 @@ fetch('rhine.geojson')
             "Loaded Rhine markers:",
             rhinePoints.length
         );
-    })
-    .catch(err => {
-        console.error(err);
     });
+
+fetch('rhine_places.json')
+    .then(r => r.json())
+    .then(data => {
+
+        places = data;
+
+        const list =
+            document.getElementById(
+                'destinationList'
+            );
+
+        data.forEach(place => {
+
+            const option =
+                document.createElement(
+                    'option'
+                );
+
+            option.value =
+                place.name;
+
+            list.appendChild(
+                option
+            );
+        });
+
+        const saved =
+            localStorage.getItem(
+                'destination'
+            );
+
+        if (saved) {
+
+            document.getElementById(
+                'destinationSearch'
+            ).value = saved;
+
+            selectedDestination =
+                places.find(
+                    p =>
+                    p.name === saved
+                );
+        }
+    });
+
+document
+.getElementById(
+    'destinationSearch'
+)
+.addEventListener(
+    'change',
+    e => {
+
+        const value =
+            e.target.value;
+
+        selectedDestination =
+            places.find(
+                p =>
+                p.name === value
+            );
+
+        localStorage.setItem(
+            'destination',
+            value
+        );
+    }
+);
 
 function distance(lat1, lon1, lat2, lon2) {
 
@@ -122,6 +188,71 @@ function interpolateKm(lat, lon) {
     );
 }
 
+function countLocks(
+    currentKm,
+    destinationKm
+) {
+
+    const min =
+        Math.min(
+            currentKm,
+            destinationKm
+        );
+
+    const max =
+        Math.max(
+            currentKm,
+            destinationKm
+        );
+
+    return places.filter(
+        p =>
+            p.type === 'lock' &&
+            p.km >= min &&
+            p.km <= max
+    ).length;
+}
+
+function nextLock(
+    currentKm,
+    destinationKm
+) {
+
+    if (
+        destinationKm >
+        currentKm
+    ) {
+
+        const locks =
+            places
+            .filter(
+                p =>
+                    p.type === 'lock' &&
+                    p.km > currentKm
+            )
+            .sort(
+                (a,b)=>
+                a.km-b.km
+            );
+
+        return locks[0];
+    }
+
+    const locks =
+        places
+        .filter(
+            p =>
+                p.type === 'lock' &&
+                p.km < currentKm
+        )
+        .sort(
+            (a,b)=>
+            b.km-a.km
+        );
+
+    return locks[0];
+}
+
 const map = L.map('map').setView([50.0, 7.0], 6);
 
 L.tileLayer(
@@ -214,12 +345,98 @@ navigator.geolocation.watchPosition(
             Rhine km:
             ${km ? km.toFixed(1) : "--"}<br>
             Speed:
-            ${(speed * 3.6).toFixed(1)} km/h<br>
-            Lat:
-            ${lat.toFixed(5)}<br>
-            Lon:
-            ${lon.toFixed(5)}
+            ${(speed * 3.6).toFixed(1)} km/h
         `;
+
+        if (
+            selectedDestination &&
+            km
+        ) {
+
+            const distanceLeft =
+                Math.abs(
+                    selectedDestination.km -
+                    km
+                );
+
+            const downstream =
+                selectedDestination.km >
+                km;
+
+            const locks =
+                countLocks(
+                    km,
+                    selectedDestination.km
+                );
+
+            const lockDelay =
+                locks * 0.5;
+
+            const vesselSpeed =
+                Math.max(
+                    1,
+                    speed * 3.6
+                );
+
+            const travelHours =
+                distanceLeft /
+                vesselSpeed;
+
+            const eta =
+                travelHours +
+                lockDelay;
+
+            const next =
+                nextLock(
+                    km,
+                    selectedDestination.km
+                );
+
+            document
+                .getElementById(
+                    'routeInfo'
+                )
+                .innerHTML = `
+
+                <b>${selectedDestination.name}</b><br>
+
+                ${
+                    downstream
+                    ? '↓ Downstream'
+                    : '↑ Upstream'
+                }<br>
+
+                ${km.toFixed(1)}
+                →
+                ${selectedDestination.km}<br>
+
+                ${distanceLeft.toFixed(1)}
+                km<br>
+
+                Locks:
+                ${locks}<br>
+
+                Next:
+                ${
+                    next
+                    ? next.name
+                    : '-'
+                }<br>
+
+                ${
+                    next
+                    ? Math.abs(
+                        next.km - km
+                      ).toFixed(1)
+                    : '-'
+                }
+                km<br>
+
+                ETA:
+                ${eta.toFixed(1)}
+                h
+                `;
+        }
     },
 
     (error) => {
