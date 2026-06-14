@@ -26,7 +26,22 @@ html, body {
 </style>
 </head>
 <body>
+<div id="routePanel">
 
+    <input
+        id="destinationSearch"
+        list="destinationList"
+        placeholder="Destination">
+
+    <datalist id="destinationList"></datalist>
+
+    <div id="routeInfo">
+        No destination selected
+    </div>
+
+</div>
+
+<div id="map"></div>
 <div id="map"></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
