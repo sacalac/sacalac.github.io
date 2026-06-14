@@ -1,0 +1,872 @@
+[
+  {
+    "name": "Rheinfelden",
+    "km": 150.0,
+    "type": "place"
+  },
+  {
+    "name": "Augst",
+    "km": 155.0,
+    "type": "place"
+  },
+  {
+    "name": "Schleuse Augst",
+    "km": 155.6,
+    "type": "lock"
+  },
+  {
+    "name": "Birsfelden",
+    "km": 163.0,
+    "type": "place"
+  },
+  {
+    "name": "Basel",
+    "km": 167.0,
+    "type": "place"
+  },
+  {
+    "name": "Weil am Rhein",
+    "km": 171.0,
+    "type": "place"
+  },
+  {
+    "name": "Huningue",
+    "km": 170.5,
+    "type": "place"
+  },
+  {
+    "name": "Istein",
+    "km": 180.0,
+    "type": "place"
+  },
+  {
+    "name": "Doppelschleuse Kembs",
+    "km": 179.35,
+    "type": "lock"
+  },
+  {
+    "name": "Kembs",
+    "km": 184.0,
+    "type": "place"
+  },
+  {
+    "name": "Niffer",
+    "km": 186.0,
+    "type": "place"
+  },
+  {
+    "name": "Bellingen",
+    "km": 189.0,
+    "type": "place"
+  },
+  {
+    "name": "Ottmarsheim",
+    "km": 195.0,
+    "type": "place"
+  },
+  {
+    "name": "Doppelschleuse Ottmarsheim",
+    "km": 194.35,
+    "type": "lock"
+  },
+  {
+    "name": "Chalampe",
+    "km": 200.0,
+    "type": "place"
+  },
+  {
+    "name": "Bantzenheim",
+    "km": 202.0,
+    "type": "place"
+  },
+  {
+    "name": "Zienken / Blödelsheim",
+    "km": 204.5,
+    "type": "place"
+  },
+  {
+    "name": "Schleuse Fessenheim",
+    "km": 212.4,
+    "type": "lock"
+  },
+  {
+    "name": "Fessenheim / Nambsheim",
+    "km": 211.5,
+    "type": "place"
+  },
+  {
+    "name": "Geiswasser",
+    "km": 219.0,
+    "type": "place"
+  },
+  {
+    "name": "Schleuse Vogelgrün / Breisach",
+    "km": 226.5,
+    "type": "lock"
+  },
+  {
+    "name": "Breisach",
+    "km": 225.8,
+    "type": "place"
+  },
+  {
+    "name": "Artzenheim",
+    "km": 236.0,
+    "type": "place"
+  },
+  {
+    "name": "Marckolsheim",
+    "km": 239.0,
+    "type": "place"
+  },
+  {
+    "name": "Schleuse Marckolsheim",
+    "km": 240.05,
+    "type": "lock"
+  },
+  {
+    "name": "Schoenau",
+    "km": 249.0,
+    "type": "place"
+  },
+  {
+    "name": "Rhinau",
+    "km": 251.0,
+    "type": "place"
+  },
+  {
+    "name": "Schleuse Rhinau",
+    "km": 256.04999999999995,
+    "type": "lock"
+  },
+  {
+    "name": "Nonnenweier",
+    "km": 266.0,
+    "type": "place"
+  },
+  {
+    "name": "Ottenheim",
+    "km": 270.0,
+    "type": "place"
+  },
+  {
+    "name": "Gerstheim",
+    "km": 272.0,
+    "type": "place"
+  },
+  {
+    "name": "Schleuse Gerstheim",
+    "km": 274.35,
+    "type": "lock"
+  },
+  {
+    "name": "Plobsheim",
+    "km": 279.0,
+    "type": "place"
+  },
+  {
+    "name": "Altenheim / Eschau",
+    "km": 281.0,
+    "type": "place"
+  },
+  {
+    "name": "Strasbourg",
+    "km": 288.5,
+    "type": "place"
+  },
+  {
+    "name": "Schleuse Strasbourg-Neuhof",
+    "km": 287.5,
+    "type": "lock"
+  },
+  {
+    "name": "Kehl",
+    "km": 293.0,
+    "type": "place"
+  },
+  {
+    "name": "Rheinbischofsheim",
+    "km": 305.0,
+    "type": "place"
+  },
+  {
+    "name": "Gambsheim",
+    "km": 309.0,
+    "type": "place"
+  },
+  {
+    "name": "Schleuse Gambsheim",
+    "km": 309.0,
+    "type": "lock"
+  },
+  {
+    "name": "Helmlingen",
+    "km": 314.0,
+    "type": "place"
+  },
+  {
+    "name": "Dalhunden / Greffern",
+    "km": 320.0,
+    "type": "place"
+  },
+  {
+    "name": "Fort-Louis",
+    "km": 328.0,
+    "type": "place"
+  },
+  {
+    "name": "Hügelsheim / Beinheim",
+    "km": 333.0,
+    "type": "place"
+  },
+  {
+    "name": "Schleuse Iffezheim",
+    "km": 334.0,
+    "type": "lock"
+  },
+  {
+    "name": "Wintersdorf",
+    "km": 336.0,
+    "type": "place"
+  },
+  {
+    "name": "Seltz",
+    "km": 340.0,
+    "type": "place"
+  },
+  {
+    "name": "Steinmauern / Mothern / Illingen",
+    "km": 345.5,
+    "type": "place"
+  },
+  {
+    "name": "Lauterbourg",
+    "km": 349.0,
+    "type": "place"
+  },
+  {
+    "name": "Neuburg am Rhein",
+    "km": 352.0,
+    "type": "place"
+  },
+  {
+    "name": "Neuburgweier",
+    "km": 354.0,
+    "type": "place"
+  },
+  {
+    "name": "Karlsruhe-Daxlanden",
+    "km": 355.0,
+    "type": "place"
+  },
+  {
+    "name": "Schleuse Karlsruhe (Maxau)",
+    "km": 360.0,
+    "type": "lock"
+  },
+  {
+    "name": "Wörth",
+    "km": 363.0,
+    "type": "place"
+  },
+  {
+    "name": "Germersheim",
+    "km": 384.0,
+    "type": "place"
+  },
+  {
+    "name": "Philippsburg",
+    "km": 388.0,
+    "type": "place"
+  },
+  {
+    "name": "Speyer",
+    "km": 400.0,
+    "type": "place"
+  },
+  {
+    "name": "Ketsch",
+    "km": 407.0,
+    "type": "place"
+  },
+  {
+    "name": "Mannheim",
+    "km": 424.0,
+    "type": "place"
+  },
+  {
+    "name": "Ludwigshafen",
+    "km": 425.0,
+    "type": "place"
+  },
+  {
+    "name": "Worms",
+    "km": 444.0,
+    "type": "place"
+  },
+  {
+    "name": "Gernsheim",
+    "km": 462.0,
+    "type": "place"
+  },
+  {
+    "name": "Guntersblum",
+    "km": 472.0,
+    "type": "place"
+  },
+  {
+    "name": "Oppenheim",
+    "km": 480.0,
+    "type": "place"
+  },
+  {
+    "name": "Nierstein",
+    "km": 482.0,
+    "type": "place"
+  },
+  {
+    "name": "Nackenheim",
+    "km": 487.0,
+    "type": "place"
+  },
+  {
+    "name": "Laubenheim",
+    "km": 492.0,
+    "type": "place"
+  },
+  {
+    "name": "Mainz",
+    "km": 497.5,
+    "type": "place"
+  },
+  {
+    "name": "Gustavsburg / Mainz-Kastel",
+    "km": 496.5,
+    "type": "place"
+  },
+  {
+    "name": "Wiesbaden-Amöneburg / Biebrich",
+    "km": 502.0,
+    "type": "place"
+  },
+  {
+    "name": "Wiesbaden-Schierstein",
+    "km": 506.0,
+    "type": "place"
+  },
+  {
+    "name": "Eltville / Erbach",
+    "km": 512.0,
+    "type": "place"
+  },
+  {
+    "name": "Oestrich / Mittelheim / Winkel",
+    "km": 517.0,
+    "type": "place"
+  },
+  {
+    "name": "Geisenheim",
+    "km": 523.0,
+    "type": "place"
+  },
+  {
+    "name": "Rüdesheim",
+    "km": 527.0,
+    "type": "place"
+  },
+  {
+    "name": "Bingen",
+    "km": 527.5,
+    "type": "place"
+  },
+  {
+    "name": "Bingerbrück",
+    "km": 530.0,
+    "type": "place"
+  },
+  {
+    "name": "Assmannshausen",
+    "km": 532.0,
+    "type": "place"
+  },
+  {
+    "name": "Trechtingshausen",
+    "km": 535.0,
+    "type": "place"
+  },
+  {
+    "name": "Niederheimbach",
+    "km": 539.0,
+    "type": "place"
+  },
+  {
+    "name": "Lorch",
+    "km": 540.0,
+    "type": "place"
+  },
+  {
+    "name": "Lorchhausen",
+    "km": 542.0,
+    "type": "place"
+  },
+  {
+    "name": "Kaub",
+    "km": 546.0,
+    "type": "place"
+  },
+  {
+    "name": "Oberwesel",
+    "km": 550.0,
+    "type": "place"
+  },
+  {
+    "name": "St. Goar",
+    "km": 556.0,
+    "type": "place"
+  },
+  {
+    "name": "St. Goarshausen",
+    "km": 556.0,
+    "type": "place"
+  },
+  {
+    "name": "Wellmich",
+    "km": 559.0,
+    "type": "place"
+  },
+  {
+    "name": "Kestert",
+    "km": 563.0,
+    "type": "place"
+  },
+  {
+    "name": "Hirzenach",
+    "km": 563.0,
+    "type": "place"
+  },
+  {
+    "name": "Bad Salzig",
+    "km": 565.0,
+    "type": "place"
+  },
+  {
+    "name": "Kamp-Bornhofen",
+    "km": 568.0,
+    "type": "place"
+  },
+  {
+    "name": "Boppard",
+    "km": 570.0,
+    "type": "place"
+  },
+  {
+    "name": "Filsen",
+    "km": 571.5,
+    "type": "place"
+  },
+  {
+    "name": "Osterspai",
+    "km": 575.0,
+    "type": "place"
+  },
+  {
+    "name": "Spay",
+    "km": 578.0,
+    "type": "place"
+  },
+  {
+    "name": "Braubach",
+    "km": 579.7,
+    "type": "place"
+  },
+  {
+    "name": "Rhens",
+    "km": 582.0,
+    "type": "place"
+  },
+  {
+    "name": "Lahnstein (Ober-/Niederlahnstein)",
+    "km": 585.0,
+    "type": "place"
+  },
+  {
+    "name": "Koblenz",
+    "km": 592.0,
+    "type": "place"
+  },
+  {
+    "name": "Vallendar",
+    "km": 597.0,
+    "type": "place"
+  },
+  {
+    "name": "Bendorf",
+    "km": 598.0,
+    "type": "place"
+  },
+  {
+    "name": "Engers",
+    "km": 601.0,
+    "type": "place"
+  },
+  {
+    "name": "Neuwied",
+    "km": 608.0,
+    "type": "place"
+  },
+  {
+    "name": "Andernach",
+    "km": 611.0,
+    "type": "place"
+  },
+  {
+    "name": "Leutesdorf",
+    "km": 615.0,
+    "type": "place"
+  },
+  {
+    "name": "Namedy",
+    "km": 616.0,
+    "type": "place"
+  },
+  {
+    "name": "Hammerstein",
+    "km": 617.0,
+    "type": "place"
+  },
+  {
+    "name": "Brohl",
+    "km": 620.5,
+    "type": "place"
+  },
+  {
+    "name": "Rheinbrohl",
+    "km": 621.5,
+    "type": "place"
+  },
+  {
+    "name": "Bad Hönningen",
+    "km": 623.9,
+    "type": "place"
+  },
+  {
+    "name": "Bad Breisig",
+    "km": 625.0,
+    "type": "place"
+  },
+  {
+    "name": "Linz",
+    "km": 630.0,
+    "type": "place"
+  },
+  {
+    "name": "Remagen",
+    "km": 634.0,
+    "type": "place"
+  },
+  {
+    "name": "Erpel",
+    "km": 633.5,
+    "type": "place"
+  },
+  {
+    "name": "Unkel",
+    "km": 637.0,
+    "type": "place"
+  },
+  {
+    "name": "Oberwinter",
+    "km": 639.0,
+    "type": "place"
+  },
+  {
+    "name": "Rolandseck",
+    "km": 640.0,
+    "type": "place"
+  },
+  {
+    "name": "Bad Honnef",
+    "km": 641.0,
+    "type": "place"
+  },
+  {
+    "name": "Rhöndorf",
+    "km": 643.0,
+    "type": "place"
+  },
+  {
+    "name": "Königswinter",
+    "km": 645.0,
+    "type": "place"
+  },
+  {
+    "name": "Bonn",
+    "km": 653.5,
+    "type": "place"
+  },
+  {
+    "name": "Mondorf / Hersel / Rheidt / Widdig",
+    "km": 662.0,
+    "type": "place"
+  },
+  {
+    "name": "Niederkassel",
+    "km": 665.0,
+    "type": "place"
+  },
+  {
+    "name": "Lülsdorf",
+    "km": 668.0,
+    "type": "place"
+  },
+  {
+    "name": "Wesseling",
+    "km": 670.0,
+    "type": "place"
+  },
+  {
+    "name": "Godorf",
+    "km": 672.0,
+    "type": "place"
+  },
+  {
+    "name": "Sürth",
+    "km": 675.0,
+    "type": "place"
+  },
+  {
+    "name": "Weiß",
+    "km": 676.0,
+    "type": "place"
+  },
+  {
+    "name": "Porz",
+    "km": 679.0,
+    "type": "place"
+  },
+  {
+    "name": "Köln (Cologne)",
+    "km": 691.0,
+    "type": "place"
+  },
+  {
+    "name": "Köln-Deutz",
+    "km": 686.0,
+    "type": "place"
+  },
+  {
+    "name": "Köln-Mülheim",
+    "km": 692.0,
+    "type": "place"
+  },
+  {
+    "name": "Köln-Niehl",
+    "km": 696.0,
+    "type": "place"
+  },
+  {
+    "name": "Köln-Merkenich",
+    "km": 700.0,
+    "type": "place"
+  },
+  {
+    "name": "Leverkusen",
+    "km": 702.0,
+    "type": "place"
+  },
+  {
+    "name": "Hitdorf",
+    "km": 706.0,
+    "type": "place"
+  },
+  {
+    "name": "Dormagen",
+    "km": 711.0,
+    "type": "place"
+  },
+  {
+    "name": "Monheim / Baumberg",
+    "km": 713.0,
+    "type": "place"
+  },
+  {
+    "name": "Zons",
+    "km": 717.0,
+    "type": "place"
+  },
+  {
+    "name": "Düsseldorf",
+    "km": 736.5,
+    "type": "place"
+  },
+  {
+    "name": "Benrath",
+    "km": 722.0,
+    "type": "place"
+  },
+  {
+    "name": "Reisholz",
+    "km": 723.0,
+    "type": "place"
+  },
+  {
+    "name": "Hamm",
+    "km": 738.0,
+    "type": "place"
+  },
+  {
+    "name": "Oberkassel",
+    "km": 744.0,
+    "type": "place"
+  },
+  {
+    "name": "Kaiserswerth",
+    "km": 756.0,
+    "type": "place"
+  },
+  {
+    "name": "Duisburg",
+    "km": 776.5,
+    "type": "place"
+  },
+  {
+    "name": "Walsum",
+    "km": 792.0,
+    "type": "place"
+  },
+  {
+    "name": "Orsoy",
+    "km": 793.0,
+    "type": "place"
+  },
+  {
+    "name": "Götterswickerhamm",
+    "km": 800.0,
+    "type": "place"
+  },
+  {
+    "name": "Mehrum",
+    "km": 803.0,
+    "type": "place"
+  },
+  {
+    "name": "Rheinberg",
+    "km": 805.0,
+    "type": "place"
+  },
+  {
+    "name": "Wesel",
+    "km": 813.0,
+    "type": "place"
+  },
+  {
+    "name": "Bislich",
+    "km": 824.0,
+    "type": "place"
+  },
+  {
+    "name": "Xanten",
+    "km": 825.0,
+    "type": "place"
+  },
+  {
+    "name": "Rees",
+    "km": 838.0,
+    "type": "place"
+  },
+  {
+    "name": "Grieth",
+    "km": 845.0,
+    "type": "place"
+  },
+  {
+    "name": "Emmerich",
+    "km": 852.0,
+    "type": "place"
+  },
+  {
+    "name": "Spijk",
+    "km": 858.0,
+    "type": "place"
+  },
+  {
+    "name": "Lobith / Tolkamer",
+    "km": 861.0,
+    "type": "place"
+  },
+  {
+    "name": "Millingen",
+    "km": 867.0,
+    "type": "place"
+  },
+  {
+    "name": "Nijmegen",
+    "km": 884.0,
+    "type": "place"
+  },
+  {
+    "name": "Tiel",
+    "km": 915.0,
+    "type": "place"
+  },
+  {
+    "name": "Zaltbommel",
+    "km": 936.0,
+    "type": "place"
+  },
+  {
+    "name": "Woudrichem",
+    "km": 951.0,
+    "type": "place"
+  },
+  {
+    "name": "Gorinchem",
+    "km": 954.0,
+    "type": "place"
+  },
+  {
+    "name": "Sliedrecht",
+    "km": 969.0,
+    "type": "place"
+  },
+  {
+    "name": "Dordrecht",
+    "km": 978.0,
+    "type": "place"
+  },
+  {
+    "name": "Papendrecht",
+    "km": 974.0,
+    "type": "place"
+  },
+  {
+    "name": "Kinderdijk",
+    "km": 984.0,
+    "type": "place"
+  },
+  {
+    "name": "Ridderkerk",
+    "km": 984.0,
+    "type": "place"
+  },
+  {
+    "name": "Rotterdam",
+    "km": 1002.5,
+    "type": "place"
+  },
+  {
+    "name": "Vlaardingen",
+    "km": 1011.0,
+    "type": "place"
+  },
+  {
+    "name": "Maassluis",
+    "km": 1019.0,
+    "type": "place"
+  },
+  {
+    "name": "Hoek van Holland",
+    "km": 1031.5,
+    "type": "place"
+  }
+]
