@@ -1,3 +1,5 @@
+let places = [];
+let selectedDestination = null;
 let rhinePoints = [];
 
 fetch('rhine.geojson')
