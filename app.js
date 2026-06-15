@@ -3,65 +3,71 @@ let places = [];
 let selectedDestination = null;
 
 fetch('rhine.geojson')
-    .then(r => r.json())
-    .then(data => {
+.then(r => r.json())
+.then(data => {
 
-        rhinePoints = data.features.map(f => ({
-            km: Number(f.properties.KM1),
-            lat: f.geometry.coordinates[1],
-            lon: f.geometry.coordinates[0]
-        }));
+    rhinePoints = data.features.map(f => ({
+        km: Number(f.properties.KM1),
+        lat: f.geometry.coordinates[1],
+        lon: f.geometry.coordinates[0]
+    }));
 
-        console.log(
-            "Loaded Rhine markers:",
-            rhinePoints.length
-        );
-    });
+    console.log("Rhine markers:", rhinePoints.length);
+});
 
 fetch('rhine_places.json')
-    .then(r => r.json())
-    .then(data => {
+.then(r => r.json())
+.then(data => {
 
-        places = data;
+    places = data;
 
-        const list =
-            document.getElementById(
-                'destinationList'
+    const list =
+        document.getElementById(
+            'destinationList'
+        );
+
+    data.forEach(place => {
+
+        const option =
+            document.createElement(
+                'option'
             );
 
-        data.forEach(place => {
+        option.value =
+            place.name;
 
-            const option =
-                document.createElement(
-                    'option'
-                );
-
-            option.value =
-                place.name;
-
-            list.appendChild(
-                option
-            );
-        });
-
-        const saved =
-            localStorage.getItem(
-                'destination'
-            );
-
-        if (saved) {
-
-            document.getElementById(
-                'destinationSearch'
-            ).value = saved;
-
-            selectedDestination =
-                places.find(
-                    p =>
-                    p.name === saved
-                );
-        }
+        list.appendChild(option);
     });
+
+    const saved =
+        localStorage.getItem(
+            'destination'
+        );
+
+    if (saved) {
+
+        document.getElementById(
+            'destinationSearch'
+        ).value = saved;
+
+        selectedDestination =
+            places.find(
+                p => p.name === saved
+            );
+    }
+});
+
+document
+.getElementById('searchBtn')
+.addEventListener('click', () => {
+
+    document
+    .getElementById(
+        'searchPanel'
+    )
+    .classList
+    .toggle('open');
+});
 
 document
 .getElementById(
@@ -87,7 +93,12 @@ document
     }
 );
 
-function distance(lat1, lon1, lat2, lon2) {
+function distance(
+    lat1,
+    lon1,
+    lat2,
+    lon2
+) {
 
     const R = 6371;
 
@@ -112,23 +123,27 @@ function distance(lat1, lon1, lat2, lon2) {
         );
 }
 
-function getNearestPoints(lat, lon) {
+function getNearestPoints(
+    lat,
+    lon
+) {
 
     const points =
         rhinePoints
-            .map(p => ({
-                ...p,
-                dist: distance(
-                    lat,
-                    lon,
-                    p.lat,
-                    p.lon
-                )
-            }))
-            .sort(
-                (a, b) =>
-                    a.dist - b.dist
-            );
+        .map(p => ({
+            ...p,
+            dist:
+            distance(
+                lat,
+                lon,
+                p.lat,
+                p.lon
+            )
+        }))
+        .sort(
+            (a,b)=>
+            a.dist-b.dist
+        );
 
     return [
         points[0],
@@ -136,7 +151,10 @@ function getNearestPoints(lat, lon) {
     ];
 }
 
-function interpolateKm(lat, lon) {
+function interpolateKm(
+    lat,
+    lon
+) {
 
     if (
         rhinePoints.length < 2
@@ -144,7 +162,7 @@ function interpolateKm(lat, lon) {
         return null;
     }
 
-    const [a, b] =
+    const [a,b] =
         getNearestPoints(
             lat,
             lon
@@ -158,10 +176,6 @@ function interpolateKm(lat, lon) {
             b.lon
         );
 
-    if (total === 0) {
-        return a.km;
-    }
-
     const d =
         distance(
             a.lat,
@@ -171,10 +185,10 @@ function interpolateKm(lat, lon) {
         );
 
     const ratio =
-        Math.min(
-            1,
-            Math.max(
-                0,
+        Math.max(
+            0,
+            Math.min(
+                1,
                 d / total
             )
         );
@@ -182,9 +196,8 @@ function interpolateKm(lat, lon) {
     return (
         a.km +
         (
-            (b.km - a.km) *
-            ratio
-        )
+            b.km - a.km
+        ) * ratio
     );
 }
 
@@ -207,9 +220,9 @@ function countLocks(
 
     return places.filter(
         p =>
-            p.type === 'lock' &&
-            p.km >= min &&
-            p.km <= max
+        p.type === 'lock' &&
+        p.km >= min &&
+        p.km <= max
     ).length;
 }
 
@@ -227,8 +240,8 @@ function nextLock(
             places
             .filter(
                 p =>
-                    p.type === 'lock' &&
-                    p.km > currentKm
+                p.type === 'lock' &&
+                p.km > currentKm
             )
             .sort(
                 (a,b)=>
@@ -242,8 +255,8 @@ function nextLock(
         places
         .filter(
             p =>
-                p.type === 'lock' &&
-                p.km < currentKm
+            p.type === 'lock' &&
+            p.km < currentKm
         )
         .sort(
             (a,b)=>
@@ -253,51 +266,29 @@ function nextLock(
     return locks[0];
 }
 
-const map = L.map('map').setView([50.0, 7.0], 6);
+const map = L.map(
+    'map',
+    {
+        zoomControl: false
+    }
+).setView(
+    [50,7],
+    6
+);
 
 L.tileLayer(
     'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
     {
-        attribution:
-            '&copy; OpenStreetMap contributors'
+        attribution: ''
     }
 ).addTo(map);
 
 let marker = null;
 let firstFix = true;
 
-const info = L.control({
-    position: 'topright'
-});
-
-info.onAdd = function () {
-
-    this._div =
-        L.DomUtil.create('div');
-
-    this._div.style.background =
-        'white';
-
-    this._div.style.padding =
-        '10px';
-
-    this._div.style.borderRadius =
-        '5px';
-
-    this._div.style.boxShadow =
-        '0 0 5px rgba(0,0,0,0.3)';
-
-    this._div.innerHTML =
-        'Waiting for GPS...';
-
-    return this._div;
-};
-
-info.addTo(map);
-
 navigator.geolocation.watchPosition(
 
-    (position) => {
+    position => {
 
         const lat =
             position.coords.latitude;
@@ -306,7 +297,9 @@ navigator.geolocation.watchPosition(
             position.coords.longitude;
 
         const speed =
-            position.coords.speed || 0;
+            (
+                position.coords.speed || 0
+            ) * 3.6;
 
         const km =
             interpolateKm(
@@ -317,132 +310,131 @@ navigator.geolocation.watchPosition(
         if (!marker) {
 
             marker =
-                L.marker([
-                    lat,
-                    lon
-                ]).addTo(map);
+                L.marker(
+                    [lat,lon]
+                ).addTo(map);
 
         } else {
 
-            marker.setLatLng([
-                lat,
-                lon
-            ]);
+            marker.setLatLng(
+                [lat,lon]
+            );
         }
 
         if (firstFix) {
 
             map.setView(
-                [lat, lon],
+                [lat,lon],
                 15
             );
 
             firstFix = false;
         }
 
-        info._div.innerHTML = `
-            <b>Rhine Navigation</b><br>
-            Rhine km:
-            ${km ? km.toFixed(1) : "--"}<br>
-            Speed:
-            ${(speed * 3.6).toFixed(1)} km/h
-        `;
+        document
+        .getElementById(
+            'kmInfo'
+        )
+        .textContent =
+        `RKM:${km ? km.toFixed(1) : '--'}`;
+
+        document
+        .getElementById(
+            'sogInfo'
+        )
+        .textContent =
+        `SOG:${speed.toFixed(1)}`;
 
         if (
-            selectedDestination &&
-            km
+            !selectedDestination ||
+            !km
         ) {
-
-            const distanceLeft =
-                Math.abs(
-                    selectedDestination.km -
-                    km
-                );
-
-            const downstream =
-                selectedDestination.km >
-                km;
-
-            const locks =
-                countLocks(
-                    km,
-                    selectedDestination.km
-                );
-
-            const lockDelay =
-                locks * 0.5;
-
-            const vesselSpeed =
-                Math.max(
-                    1,
-                    speed * 3.6
-                );
-
-            const travelHours =
-                distanceLeft /
-                vesselSpeed;
-
-            const eta =
-                travelHours +
-                lockDelay;
-
-            const next =
-                nextLock(
-                    km,
-                    selectedDestination.km
-                );
-
-            document
-                .getElementById(
-                    'routeInfo'
-                )
-                .innerHTML = `
-
-                <b>${selectedDestination.name}</b><br>
-
-                ${
-                    downstream
-                    ? '↓ Downstream'
-                    : '↑ Upstream'
-                }<br>
-
-                ${km.toFixed(1)}
-                →
-                ${selectedDestination.km}<br>
-
-                ${distanceLeft.toFixed(1)}
-                km<br>
-
-                Locks:
-                ${locks}<br>
-
-                Next:
-                ${
-                    next
-                    ? next.name
-                    : '-'
-                }<br>
-
-                ${
-                    next
-                    ? Math.abs(
-                        next.km - km
-                      ).toFixed(1)
-                    : '-'
-                }
-                km<br>
-
-                ETA:
-                ${eta.toFixed(1)}
-                h
-                `;
+            return;
         }
+
+        const distanceLeft =
+            Math.abs(
+                selectedDestination.km -
+                km
+            );
+
+        const locks =
+            countLocks(
+                km,
+                selectedDestination.km
+            );
+
+        const ttlMinutes =
+            locks * 30;
+
+        const movingSpeed =
+            Math.max(
+                speed,
+                1
+            );
+
+        const travelHours =
+            distanceLeft /
+            movingSpeed;
+
+        const etaHours =
+            travelHours +
+            (
+                ttlMinutes / 60
+            );
+
+        const next =
+            nextLock(
+                km,
+                selectedDestination.km
+            );
+
+        const etaH =
+            Math.floor(
+                etaHours
+            );
+
+        const etaM =
+            Math.round(
+                (
+                    etaHours -
+                    etaH
+                ) * 60
+            );
+
+        document
+        .getElementById(
+            'locksInfo'
+        )
+        .textContent =
+        `Locks:${locks}`;
+
+        document
+        .getElementById(
+            'ttlInfo'
+        )
+        .textContent =
+        `TTL:${ttlMinutes}m`;
+
+        document
+        .getElementById(
+            'etaInfo'
+        )
+        .textContent =
+        `ETA:${etaH}h ${etaM}m`;
+
+        document
+        .getElementById(
+            'remInfo'
+        )
+        .textContent =
+        `REM:${distanceLeft.toFixed(1)}km`;
+
     },
 
-    (error) => {
+    error => {
 
         console.error(
-            "GPS Error:",
             error
         );
     },
