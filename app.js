@@ -12,7 +12,10 @@ fetch('rhine.geojson')
         lon: f.geometry.coordinates[0]
     }));
 
-    console.log("Rhine markers:", rhinePoints.length);
+    console.log(
+        "Rhine markers:",
+        rhinePoints.length
+    );
 });
 
 fetch('rhine_places.json')
@@ -21,24 +24,6 @@ fetch('rhine_places.json')
 
     places = data;
 
-    const list =
-        document.getElementById(
-            'destinationList'
-        );
-
-    data.forEach(place => {
-
-        const option =
-            document.createElement(
-                'option'
-            );
-
-        option.value =
-            place.name;
-
-        list.appendChild(option);
-    });
-
     const saved =
         localStorage.getItem(
             'destination'
@@ -46,50 +31,136 @@ fetch('rhine_places.json')
 
     if (saved) {
 
-        document.getElementById(
-            'destinationSearch'
-        ).value = saved;
-
         selectedDestination =
             places.find(
                 p => p.name === saved
             );
+
+        document
+        .getElementById(
+            'destinationSearch'
+        ).value = saved;
     }
 });
 
-document
-.getElementById('searchBtn')
-.addEventListener('click', () => {
+const map = L.map(
+    'map',
+    {
+        zoomControl: false
+    }
+).setView(
+    [50, 7],
+    6
+);
 
-    document
-    .getElementById(
-        'searchPanel'
-    )
-    .classList
-    .toggle('open');
-});
+L.tileLayer(
+    'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+    {
+        attribution: ''
+    }
+).addTo(map);
+
+let marker = null;
+let firstFix = true;
 
 document
 .getElementById(
-    'destinationSearch'
+    'searchBtn'
 )
 .addEventListener(
-    'change',
-    e => {
+    'click',
+    () => {
+
+        document
+        .getElementById(
+            'searchPanel'
+        )
+        .classList
+        .toggle(
+            'open'
+        );
+    }
+);
+
+const searchInput =
+document.getElementById(
+    'destinationSearch'
+);
+
+const suggestions =
+document.getElementById(
+    'suggestions'
+);
+
+searchInput.addEventListener(
+    'input',
+    () => {
 
         const value =
-            e.target.value;
+            searchInput.value
+            .toLowerCase();
 
-        selectedDestination =
-            places.find(
-                p =>
-                p.name === value
+        suggestions.innerHTML = '';
+
+        if (
+            value.length < 2
+        ) {
+            return;
+        }
+
+        places
+        .filter(
+            p =>
+            p.name
+            .toLowerCase()
+            .includes(value)
+        )
+        .slice(0, 20)
+        .forEach(place => {
+
+            const div =
+                document.createElement(
+                    'div'
+                );
+
+            div.className =
+                'suggestion';
+
+            div.textContent =
+                place.name;
+
+            div.onclick =
+                () => {
+
+                    selectedDestination =
+                        place;
+
+                    localStorage.setItem(
+                        'destination',
+                        place.name
+                    );
+
+                    searchInput.value =
+                        place.name;
+
+                    suggestions.innerHTML =
+                        '';
+
+                    document
+                    .getElementById(
+                        'searchPanel'
+                    )
+                    .classList
+                    .remove(
+                        'open'
+                    );
+                };
+
+            suggestions
+            .appendChild(
+                div
             );
-
-        localStorage.setItem(
-            'destination',
-            value
-        );
+        });
     }
 );
 
@@ -111,10 +182,23 @@ function distance(
         Math.PI / 180;
 
     const a =
-        Math.sin(dLat / 2) ** 2 +
-        Math.cos(lat1 * Math.PI / 180) *
-        Math.cos(lat2 * Math.PI / 180) *
-        Math.sin(dLon / 2) ** 2;
+        Math.sin(
+            dLat / 2
+        ) ** 2 +
+
+        Math.cos(
+            lat1 *
+            Math.PI / 180
+        ) *
+
+        Math.cos(
+            lat2 *
+            Math.PI / 180
+        ) *
+
+        Math.sin(
+            dLon / 2
+        ) ** 2;
 
     return R * 2 *
         Math.atan2(
@@ -176,6 +260,10 @@ function interpolateKm(
             b.lon
         );
 
+    if (total === 0) {
+        return a.km;
+    }
+
     const d =
         distance(
             a.lat,
@@ -236,55 +324,29 @@ function nextLock(
         currentKm
     ) {
 
-        const locks =
-            places
-            .filter(
-                p =>
-                p.type === 'lock' &&
-                p.km > currentKm
-            )
-            .sort(
-                (a,b)=>
-                a.km-b.km
-            );
-
-        return locks[0];
-    }
-
-    const locks =
-        places
+        return places
         .filter(
             p =>
             p.type === 'lock' &&
-            p.km < currentKm
+            p.km > currentKm
         )
         .sort(
             (a,b)=>
-            b.km-a.km
-        );
+            a.km-b.km
+        )[0];
+    }
 
-    return locks[0];
+    return places
+    .filter(
+        p =>
+        p.type === 'lock' &&
+        p.km < currentKm
+    )
+    .sort(
+        (a,b)=>
+        b.km-a.km
+    )[0];
 }
-
-const map = L.map(
-    'map',
-    {
-        zoomControl: false
-    }
-).setView(
-    [50,7],
-    6
-);
-
-L.tileLayer(
-    'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-    {
-        attribution: ''
-    }
-).addTo(map);
-
-let marker = null;
-let firstFix = true;
 
 navigator.geolocation.watchPosition(
 
@@ -311,20 +373,20 @@ navigator.geolocation.watchPosition(
 
             marker =
                 L.marker(
-                    [lat,lon]
+                    [lat, lon]
                 ).addTo(map);
 
         } else {
 
             marker.setLatLng(
-                [lat,lon]
+                [lat, lon]
             );
         }
 
         if (firstFix) {
 
             map.setView(
-                [lat,lon],
+                [lat, lon],
                 15
             );
 
@@ -383,12 +445,6 @@ navigator.geolocation.watchPosition(
                 ttlMinutes / 60
             );
 
-        const next =
-            nextLock(
-                km,
-                selectedDestination.km
-            );
-
         const etaH =
             Math.floor(
                 etaHours
@@ -421,7 +477,7 @@ navigator.geolocation.watchPosition(
             'etaInfo'
         )
         .textContent =
-        `ETA:${etaH}h ${etaM}m`;
+        `ETA:${etaH}h${etaM}m`;
 
         document
         .getElementById(
@@ -429,7 +485,6 @@ navigator.geolocation.watchPosition(
         )
         .textContent =
         `REM:${distanceLeft.toFixed(1)}km`;
-
     },
 
     error => {
