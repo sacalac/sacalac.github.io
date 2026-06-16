@@ -2,9 +2,9 @@
 <html>
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
 <title>Rhine Navigation</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <link rel="stylesheet"
 href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
@@ -12,208 +12,145 @@ href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
 
 html,
-body{
-margin:0;
-padding:0;
-height:100%;
-overflow:hidden;
-font-family:Arial,sans-serif;
+body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
 }
 
-#map{
-width:100%;
-height:100%;
+#map {
+    width: 100%;
+    height: 100%;
 }
 
-#topBar{
+#topBar {
 
-position:absolute;
+    position: absolute;
 
-top:0;
-left:0;
+    top: 0;
+    left: 0;
 
-width:100%;
+    width: 100%;
 
-height:10vh;
+    height: 10vh;
 
-background:rgba(70,70,70,.55);
+    background: rgba(60,60,60,0.75);
 
-backdrop-filter:blur(10px);
+    backdrop-filter: blur(6px);
 
--webkit-backdrop-filter:blur(10px);
+    color: white;
 
-z-index:1000;
+    z-index: 1000;
 
-color:white;
+    display: flex;
 
-display:flex;
+    flex-direction: column;
 
-flex-direction:column;
-
-justify-content:center;
-
-border-bottom-left-radius:12px;
-
-border-bottom-right-radius:12px;
+    justify-content: center;
 }
 
-.barRow{
+.barRow {
 
-display:grid;
+    display: flex;
 
-grid-template-columns:repeat(6,1fr);
+    justify-content: space-around;
 
-text-align:center;
+    align-items: center;
+
+    font-size: 16px;
+
+    font-weight: bold;
+
+    margin: 2px 0;
 }
 
-.big{
+#searchBtn {
 
-font-size:22px;
+    position: absolute;
 
-font-weight:bold;
+    left: 12px;
+
+    top: 12vh;
+
+    width: 58px;
+
+    height: 58px;
+
+    border: none;
+
+    border-radius: 50%;
+
+    background: rgba(60,60,60,0.85);
+
+    color: white;
+
+    font-size: 28px;
+
+    z-index: 1200;
+
+    box-shadow: 0 0 10px rgba(0,0,0,0.4);
 }
 
-.small{
+#searchPanel {
 
-font-size:10px;
+    position: absolute;
 
-opacity:.85;
+    top: 12vh;
+
+    left: -320px;
+
+    width: 280px;
+
+    background: rgba(255,255,255,0.96);
+
+    border-radius: 12px;
+
+    padding: 12px;
+
+    z-index: 1100;
+
+    transition: left .25s ease;
 }
 
-#destinationBar{
+#searchPanel.open {
 
-position:absolute;
-
-top:10vh;
-
-left:50%;
-
-transform:translateX(-50%);
-
-margin-top:3px;
-
-background:rgba(70,70,70,.55);
-
-backdrop-filter:blur(10px);
-
--webkit-backdrop-filter:blur(10px);
-
-color:white;
-
-padding:6px 16px;
-
-border-radius:10px;
-
-z-index:1000;
-
-display:none;
-
-max-width:80%;
-
-white-space:nowrap;
-
-overflow:hidden;
-
-text-overflow:ellipsis;
-
-font-size:14px;
-
-font-weight:bold;
+    left: 80px;
 }
 
-#searchBtn{
+#destinationSearch {
 
-position:absolute;
+    width: 100%;
 
-left:12px;
+    box-sizing: border-box;
 
-top:11vh;
+    font-size: 16px;
 
-width:58px;
-
-height:58px;
-
-border:none;
-
-border-radius:50%;
-
-background:rgba(70,70,70,.70);
-
-backdrop-filter:blur(10px);
-
--webkit-backdrop-filter:blur(10px);
-
-color:white;
-
-font-size:28px;
-
-z-index:1200;
-
-box-shadow:0 0 10px rgba(0,0,0,.35);
+    padding: 10px;
 }
 
-#searchPanel{
+#suggestions {
 
-position:absolute;
+    margin-top: 8px;
 
-top:11vh;
+    max-height: 300px;
 
-left:-320px;
-
-width:280px;
-
-background:rgba(255,255,255,.96);
-
-border-radius:12px;
-
-padding:12px;
-
-z-index:1100;
-
-transition:left .25s ease;
+    overflow-y: auto;
 }
 
-#searchPanel.open{
+.suggestion {
 
-left:80px;
+    padding: 10px;
+
+    border-bottom: 1px solid #ddd;
+
+    cursor: pointer;
 }
 
-#destinationSearch{
+.suggestion:hover {
 
-width:100%;
-
-box-sizing:border-box;
-
-padding:10px;
-
-font-size:16px;
-
-border-radius:8px;
-
-border:1px solid #ccc;
-}
-
-#suggestions{
-
-margin-top:8px;
-
-max-height:300px;
-
-overflow-y:auto;
-}
-
-.suggestion{
-
-padding:10px;
-
-border-bottom:1px solid #ddd;
-
-cursor:pointer;
-}
-
-.suggestion:hover{
-
-background:#f0f0f0;
+    background: #f0f0f0;
 }
 
 </style>
@@ -223,43 +160,29 @@ background:#f0f0f0;
 
 <div id="topBar">
 
-<div class="barRow big">
+    <div class="barRow">
+        <span id="locksInfo">Locks:-</span>
+        <span id="sogInfo">SOG:-</span>
+        <span id="kmInfo">RKM:-</span>
+    </div>
 
-<div id="locksInfo">-</div>
-<div id="sogInfo">-</div>
-<div id="kmInfo">-</div>
-<div id="ttlInfo">-</div>
-<div id="etaInfo">-</div>
-<div id="remInfo">-</div>
+    <div class="barRow">
+        <span id="ttlInfo">TTL:-</span>
+        <span id="etaInfo">ETA:-</span>
+        <span id="remInfo">REM:-</span>
+    </div>
 
-</div>
-
-<div class="barRow small">
-
-<div>LOCKS</div>
-<div>SOG</div>
-<div>RKM</div>
-<div>TTL</div>
-<div>ETA</div>
-<div>REM</div>
-
-</div>
-
-</div>
-
-<div id="destinationBar">
-No destination
 </div>
 
 <button id="searchBtn">🔍</button>
 
 <div id="searchPanel">
 
-<input
-id="destinationSearch"
-placeholder="Search destination...">
+    <input
+        id="destinationSearch"
+        placeholder="Search destination...">
 
-<div id="suggestions"></div>
+    <div id="suggestions"></div>
 
 </div>
 
