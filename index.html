@@ -18,7 +18,6 @@
   --panel2:   #121d2e;
   --border:   #1e3050;
   --amber:    #f5a623;
-  --amber-dim:#a86d12;
   --cyan:     #4dd9e8;
   --white:    #e8eef5;
   --muted:    #4a6080;
@@ -36,7 +35,6 @@ html, body {
   color: var(--white);
 }
 
-/* ── MAP ── */
 #map {
   position: absolute;
   inset: 0;
@@ -45,23 +43,7 @@ html, body {
   filter: brightness(0.85) saturate(0.9);
 }
 
-/* Subtle scanline over map */
-#map::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: repeating-linear-gradient(
-    0deg,
-    rgba(0,0,0,0.03) 0px,
-    rgba(0,0,0,0.03) 1px,
-    transparent 1px,
-    transparent 3px
-  );
-  pointer-events: none;
-  z-index: 400;
-}
-
-/* ── HUD BARS (SHARED STYLES) ── */
+/* ── HUD BARS ── */
 .hud-bar {
   position: absolute;
   left: 0; right: 0;
@@ -76,18 +58,9 @@ html, body {
   gap: 2px;
   height: 72px;
 }
+#hud-top { top: 0; border-width: 0 0 1px 0; }
+#hud-bottom { bottom: 0; border-width: 1px 0 0 0; }
 
-#hud-top {
-  top: 0;
-  border-width: 0 0 1px 0;
-}
-
-#hud-bottom {
-  bottom: 0;
-  border-width: 1px 0 0 0;
-}
-
-/* gauge cells */
 .gauge {
   display: flex;
   flex-direction: column;
@@ -128,7 +101,18 @@ html, body {
   letter-spacing: 0.1em;
 }
 
-/* active destination callout */
+/* Settings Icon inside Lock box */
+.lock-cfg-btn {
+  position: absolute;
+  right: 6px; top: 6px;
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 11px;
+}
+.lock-cfg-btn:hover { color: var(--cyan); }
+
 #dest-callout {
   display: flex;
   flex-direction: column;
@@ -136,38 +120,17 @@ html, body {
   padding: 8px 16px;
   border-left: 1px solid var(--border);
   min-width: 140px;
-  max-width: 200px;
+  max-width: 220px;
 }
-#dest-callout .label {
-  font-size: 9px;
-  font-weight: 600;
-  letter-spacing: 0.15em;
-  color: var(--muted);
-  text-transform: uppercase;
-}
-#dest-callout .dest-name {
-  font-family: var(--cond);
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--white);
-  letter-spacing: 0.03em;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-#dest-callout .dest-name.empty {
-  color: var(--muted);
-  font-weight: 400;
-  font-style: italic;
-}
+#dest-callout .label { font-size: 9px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.15em;}
+#dest-callout .dest-name { font-size: 16px; font-weight: 700; color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#dest-callout .dest-name.empty { color: var(--muted); font-weight: 400; font-style: italic; }
 
-/* ── SEARCH BUTTON ── */
-#searchBtn {
+/* ── CONTROLS PANEL (LEFT SIDE) ── */
+.control-btn {
   position: absolute;
   left: 14px;
-  top: calc(72px + 14px);
-  width: 46px;
-  height: 46px;
+  width: 46px; height: 46px;
   border: 1px solid var(--border);
   border-radius: 6px;
   background: rgba(10,15,26,0.92);
@@ -179,14 +142,14 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.15s, border-color 0.15s;
+  transition: all 0.15s;
 }
-#searchBtn:hover {
-  background: rgba(20,30,50,0.98);
-  border-color: var(--cyan);
-}
+.control-btn:hover { background: rgba(20,30,50,0.98); border-color: var(--cyan); }
+#searchBtn { top: calc(72px + 14px); }
+#mapLockBtn { top: calc(72px + 70px); font-size: 16px; }
+#mapLockBtn.unlocked { color: var(--muted); border-color: var(--border); }
 
-/* ── SEARCH PANEL ── */
+/* ── SEARCH DIALOG ── */
 #searchPanel {
   position: absolute;
   top: calc(72px + 14px);
@@ -201,114 +164,56 @@ html, body {
   backdrop-filter: blur(16px);
 }
 #searchPanel.open { left: 68px; }
-
-#searchPanel-header {
-  font-family: var(--cond);
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 10px;
-}
-
-#destinationSearch {
-  width: 100%;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  color: var(--white);
-  font-family: var(--cond);
-  font-size: 15px;
-  padding: 10px 12px;
-  outline: none;
-  transition: border-color 0.15s;
-}
-#destinationSearch::placeholder { color: var(--muted); }
+#searchPanel-header { font-size: 10px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+#destinationSearch { width: 100%; background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 4px; color: var(--white); font-family: var(--cond); font-size: 15px; padding: 10px 12px; outline: none; }
 #destinationSearch:focus { border-color: var(--cyan); }
-
-#suggestions {
-  margin-top: 8px;
-  max-height: 260px;
-  overflow-y: auto;
-}
-#suggestions::-webkit-scrollbar { width: 4px; }
-#suggestions::-webkit-scrollbar-track { background: transparent; }
-#suggestions::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-.suggestion {
-  padding: 9px 12px;
-  border-bottom: 1px solid rgba(30,48,80,0.5);
-  cursor: pointer;
-  font-family: var(--cond);
-  font-size: 14px;
-  color: var(--white);
-  letter-spacing: 0.02em;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: background 0.1s;
-}
-.suggestion:last-child { border-bottom: none; }
+#suggestions { margin-top: 8px; max-height: 260px; overflow-y: auto; }
+.suggestion { padding: 9px 12px; border-bottom: 1px solid rgba(30,48,80,0.5); cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 8px; }
 .suggestion:hover { background: rgba(77,217,232,0.07); color: var(--cyan); }
-.suggestion-type {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  padding: 2px 6px;
-  border-radius: 3px;
-  background: rgba(255,255,255,0.06);
-  color: var(--muted);
-  flex-shrink: 0;
-}
+.suggestion-type { font-size: 9px; font-weight: 600; text-transform: uppercase; padding: 2px 5px; border-radius: 3px; background: rgba(255,255,255,0.06); color: var(--muted); }
 .suggestion-type.lock { color: var(--amber); background: rgba(245,166,35,0.1); }
 .suggestion-type.port { color: var(--cyan); background: rgba(77,217,232,0.1); }
+.suggestion-km { margin-left: auto; font-family: var(--mono); font-size: 11px; color: var(--muted); }
 
-/* ── STATUS PILL (shifted up to clear bottom bar) ── */
-#statusPill {
+/* ── CONFIG MODAL ── */
+#configPanel {
   position: absolute;
-  bottom: 86px;
-  right: 14px;
-  z-index: 1000;
-  background: rgba(10,15,26,0.9);
+  top: 86px; right: 14px;
+  width: 220px;
+  background: rgba(12,18,28,0.97);
   border: 1px solid var(--border);
   border-radius: 6px;
-  padding: 6px 12px;
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--muted);
-  letter-spacing: 0.06em;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  backdrop-filter: blur(8px);
+  padding: 12px;
+  z-index: 1100;
+  display: none;
+  backdrop-filter: blur(16px);
 }
-#gpsIndicator {
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  background: var(--muted);
-  transition: background 0.3s;
+.config-row { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
+.config-row label { font-size: 12px; color: var(--white); }
+.config-row input { width: 60px; background: rgba(0,0,0,0.3); border: 1px solid var(--border); color: var(--amber); font-family: var(--mono); text-align: center; padding: 4px; outline: none; border-radius: 4px; }
+
+#statusPill {
+  position: absolute; bottom: 86px; right: 14px; z-index: 1000;
+  background: rgba(10,15,26,0.9); border: 1px solid var(--border); border-radius: 6px;
+  padding: 6px 12px; font-family: var(--mono); font-size: 11px; color: var(--muted);
+  display: flex; align-items: center; gap: 8px; backdrop-filter: blur(8px);
 }
+#gpsIndicator { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); }
 #gpsIndicator.active { background: var(--green); box-shadow: 0 0 6px var(--green); }
 #gpsIndicator.error  { background: var(--red); }
 
-/* Leaflet overrides */
 .leaflet-control-attribution { display: none; }
-.leaflet-control-zoom { margin-bottom: 80px !important; } /* Shift buttons up to clear bottom bar */
-.leaflet-control-zoom a {
-  background: rgba(10,15,26,0.92) !important;
-  border-color: var(--border) !important;
-  color: var(--cyan) !important;
-}
+.leaflet-control-zoom { margin-bottom: 80px !important; }
 
-/* Custom marker */
-.vessel-marker {
-  width: 14px; height: 14px;
-  background: var(--cyan);
-  border: 2px solid white;
-  border-radius: 50%;
-  box-shadow: 0 0 12px rgba(77,217,232,0.6);
+/* ── SHIP MARKER CONTAINER ── */
+.vessel-icon-container {
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform 0.2s linear; /* Smooth rotating */
+}
+.vessel-svg {
+  width: 28px; height: 28px;
+  filter: drop-shadow(0px 0px 5px rgba(77,217,232,0.8));
 }
 </style>
 </head>
@@ -320,20 +225,18 @@ html, body {
     <span class="gauge-value dim" id="kmVal">---.-</span>
     <span class="gauge-unit">km</span>
   </div>
-
   <div class="gauge">
     <span class="gauge-label">SOG</span>
     <span class="gauge-value dim" id="sogVal">--.-</span>
     <span class="gauge-unit">km/h</span>
   </div>
-
   <div class="gauge">
     <span class="gauge-label">REM</span>
     <span class="gauge-value dim" id="remVal">---.-</span>
     <span class="gauge-unit">km</span>
   </div>
-
   <div class="gauge">
+    <button class="lock-cfg-btn" id="cfgToggleBtn">⚙</button>
     <span class="gauge-label">LOCKS</span>
     <span class="gauge-value dim" id="locksVal">--</span>
     <span class="gauge-unit">ahead</span>
@@ -346,25 +249,33 @@ html, body {
     <span class="gauge-value dim" id="ttlVal">--</span>
     <span class="gauge-unit">min</span>
   </div>
-
   <div class="gauge">
     <span class="gauge-label">ETA</span>
     <span class="gauge-value highlight dim" id="etaVal">--h--</span>
     <span class="gauge-unit">&nbsp;</span>
   </div>
-
   <div id="dest-callout">
     <span class="label">Destination</span>
     <span class="dest-name empty" id="destName">Not set</span>
   </div>
 </div>
 
-<button id="searchBtn" title="Search destination">⌖</button>
+<button id="searchBtn" class="control-btn" title="Search Destination">⌖</button>
+<button id="mapLockBtn" class="control-btn" title="Toggle Map Cam-Follow">⚓</button>
 
 <div id="searchPanel">
   <div id="searchPanel-header">Set Destination</div>
-  <input id="destinationSearch" placeholder="Port or lock name…" autocomplete="off" spellcheck="false">
+  <input id="destinationSearch" placeholder="Type Port or Lock name…" autocomplete="off" spellcheck="false">
   <div id="suggestions"></div>
+</div>
+
+<div id="configPanel">
+  <div id="searchPanel-header">Navigation Parameters</div>
+  <div class="config-row">
+    <label>Lock Delay:</label>
+    <input type="number" id="lockDelayInput" value="30" min="0" max="180">
+    <span style="font-size:11px; color:var(--muted); margin-left:4px;">min</span>
+  </div>
 </div>
 
 <div id="map"></div>
@@ -383,9 +294,7 @@ window.hudUpdate = function(data) {
     const el = document.getElementById(id);
     if (!el) return;
     el.textContent = val;
-    if (active !== undefined) {
-      el.classList.toggle('dim', !active);
-    }
+    if (active !== undefined) el.classList.toggle('dim', !active);
   };
   if (data.km   !== undefined) set('kmVal',    data.km,    data.km    !== '---.-');
   if (data.sog  !== undefined) set('sogVal',   data.sog,   data.sog   !== '--.-');
@@ -400,20 +309,26 @@ window.hudUpdate = function(data) {
       el.classList.toggle('empty', !data.dest);
     }
   }
-  if (data.gps !== undefined) {
-    const dot = document.getElementById('gpsIndicator');
-    const txt = document.getElementById('gpsStatus');
-    if (dot) dot.className = 'active';
-    if (txt) txt.textContent = 'GPS ACTIVE';
+  if (data.gps) {
+    document.getElementById('gpsIndicator').className = 'active';
+    document.getElementById('gpsStatus').textContent = 'GPS ACTIVE';
   }
   if (data.gpsError) {
-    const dot = document.getElementById('gpsIndicator');
-    const txt = document.getElementById('gpsStatus');
-    if (dot) dot.className = 'error';
-    if (txt) txt.textContent = 'GPS ERROR';
+    document.getElementById('gpsIndicator').className = 'error';
+    document.getElementById('gpsStatus').textContent = 'GPS ERROR';
   }
 };
-</script>
 
+// UI Toggles
+document.getElementById('cfgToggleBtn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  const p = document.getElementById('configPanel');
+  p.style.display = p.style.display === 'block' ? 'none' : 'block';
+});
+document.body.addEventListener('click', () => {
+  document.getElementById('configPanel').style.display = 'none';
+});
+document.getElementById('configPanel').addEventListener('click', e => e.stopPropagation());
+</script>
 </body>
 </html>
