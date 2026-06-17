@@ -9,39 +9,55 @@ const vesselIcon = L.divIcon({
   iconSize: [14, 14],
   iconAnchor: [7, 7]
 });
-// This forces the browser to look in the exact same folder your HTML is running from
-fetch(window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/')) + '/rhine.geojson.txt')
 
-.then(r => r.json())
-.then(data => {
-  rhinePoints = data.features
-    .filter(f => f.properties.SPLIT === 1)
-    .map(f => ({
-      km:  Number(f.properties.KM1),
-      lat: f.geometry.coordinates[1],
-      lon: f.geometry.coordinates[0],
-      fluss: f.properties.FLUSS
-    }));
-  console.log('Rhine markers successfully loaded:', rhinePoints.length);
-})
-.catch(err => console.error("Error loading Rhine coordinates:", err));
+// Construct a bulletproof base path for GitHub Pages subfolders
+const basePath = window.location.pathname.endsWith('/') 
+  ? window.location.pathname.slice(0, -1) 
+  : window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'));
 
-fetch(window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/')) + '/rhine_places.json')
+// 1. Fetch the GeoJSON (Renamed to .geojson)
+fetch(`${basePath}/rhine.geojson`)
+  .then(r => {
+    if (!r.ok) throw new Error(`HTTP error! status: ${r.status}`);
+    return r.json();
+  })
+  .then(data => {
+    rhinePoints = data.features
+      .filter(f => f.properties.SPLIT === 1)
+      .map(f => ({
+        km:  Number(f.properties.KM1),
+        lat: f.geometry.coordinates[1],
+        lon: f.geometry.coordinates[0],
+        fluss: f.properties.FLUSS
+      }));
+    console.log('Rhine markers successfully loaded:', rhinePoints.length);
+  })
+  .catch(err => {
+    console.error("Error loading Rhine coordinates GeoJSON:", err);
+  });
 
-.then(r => r.json())
-.then(data => {
-  places = data;
-  const saved = localStorage.getItem('destination');
-  if (saved) {
-    selectedDestination = places.find(p => p.name === saved);
-    const el = document.getElementById('destinationSearch');
-    if (el) el.value = saved;
-    if (window.hudUpdate) window.hudUpdate({ dest: saved });
-  }
-})
-.catch(() => {
-  places = [];
-});
+// 2. Fetch the Places JSON (Renamed to rhine-places.json)
+fetch(`${basePath}/rhine-places.json`)
+  .then(r => {
+    if (!r.ok) throw new Error(`HTTP error! status: ${r.status}`);
+    return r.json();
+  })
+  .then(data => {
+    places = data;
+    console.log('Rhine places successfully loaded:', places.length);
+    
+    const saved = localStorage.getItem('destination');
+    if (saved) {
+      selectedDestination = places.find(p => p.name === saved);
+      const el = document.getElementById('destinationSearch');
+      if (el) el.value = saved;
+      if (window.hudUpdate) window.hudUpdate({ dest: saved });
+    }
+  })
+  .catch(err => {
+    console.error("Error loading Rhine places:", err);
+    places = [];
+  });
 
 const map = L.map('map', { zoomControl: true }).setView([50, 7], 6);
 
