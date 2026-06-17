@@ -9,9 +9,9 @@ const vesselIcon = L.divIcon({
   iconSize: [14, 14],
   iconAnchor: [7, 7]
 });
+// This forces the browser to look in the exact same folder your HTML is running from
+fetch(window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/')) + '/rhine.geojson.txt')
 
-// FIXED: Changed filename from 'rhine_geojson.txt' to matching 'rhine.geojson.txt'
-fetch('rhine.geojson.txt')
 .then(r => r.json())
 .then(data => {
   rhinePoints = data.features
