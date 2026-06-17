@@ -61,13 +61,14 @@ html, body {
   z-index: 400;
 }
 
-/* ── HUD BAR ── */
-#hud {
+/* ── HUD BARS (SHARED STYLES) ── */
+.hud-bar {
   position: absolute;
-  top: 0; left: 0; right: 0;
+  left: 0; right: 0;
   z-index: 1000;
   background: linear-gradient(180deg, rgba(10,15,26,0.97) 0%, rgba(10,15,26,0.85) 100%);
-  border-bottom: 1px solid var(--border);
+  border-color: var(--border);
+  border-style: solid;
   backdrop-filter: blur(12px);
   padding: 0 16px;
   display: flex;
@@ -76,30 +77,14 @@ html, body {
   height: 72px;
 }
 
-/* vessel name / branding strip on left */
-#hud-brand {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding-right: 16px;
-  border-right: 1px solid var(--border);
-  min-width: 90px;
+#hud-top {
+  top: 0;
+  border-width: 0 0 1px 0;
 }
-#hud-brand .label {
-  font-family: var(--cond);
-  font-size: 9px;
-  font-weight: 600;
-  letter-spacing: 0.15em;
-  color: var(--muted);
-  text-transform: uppercase;
-}
-#hud-brand .name {
-  font-family: var(--cond);
-  font-size: 17px;
-  font-weight: 700;
-  color: var(--cyan);
-  letter-spacing: 0.05em;
-  line-height: 1.1;
+
+#hud-bottom {
+  bottom: 0;
+  border-width: 1px 0 0 0;
 }
 
 /* gauge cells */
@@ -280,10 +265,10 @@ html, body {
 .suggestion-type.lock { color: var(--amber); background: rgba(245,166,35,0.1); }
 .suggestion-type.port { color: var(--cyan); background: rgba(77,217,232,0.1); }
 
-/* ── STATUS PILL (bottom-right) ── */
+/* ── STATUS PILL (shifted up to clear bottom bar) ── */
 #statusPill {
   position: absolute;
-  bottom: 20px;
+  bottom: 86px;
   right: 14px;
   z-index: 1000;
   background: rgba(10,15,26,0.9);
@@ -310,6 +295,7 @@ html, body {
 
 /* Leaflet overrides */
 .leaflet-control-attribution { display: none; }
+.leaflet-control-zoom { margin-bottom: 80px !important; } /* Shift buttons up to clear bottom bar */
 .leaflet-control-zoom a {
   background: rgba(10,15,26,0.92) !important;
   border-color: var(--border) !important;
@@ -328,13 +314,7 @@ html, body {
 </head>
 <body>
 
-<!-- HUD top bar -->
-<div id="hud">
-  <div id="hud-brand">
-    <span class="label">Rhine Nav</span>
-    <span class="name">RN-01</span>
-  </div>
-
+<div id="hud-top" class="hud-bar">
   <div class="gauge">
     <span class="gauge-label">RKM</span>
     <span class="gauge-value dim" id="kmVal">---.-</span>
@@ -358,7 +338,9 @@ html, body {
     <span class="gauge-value dim" id="locksVal">--</span>
     <span class="gauge-unit">ahead</span>
   </div>
+</div>
 
+<div id="hud-bottom" class="hud-bar">
   <div class="gauge">
     <span class="gauge-label">TTL</span>
     <span class="gauge-value dim" id="ttlVal">--</span>
@@ -377,20 +359,16 @@ html, body {
   </div>
 </div>
 
-<!-- Search toggle -->
 <button id="searchBtn" title="Search destination">⌖</button>
 
-<!-- Search panel -->
 <div id="searchPanel">
   <div id="searchPanel-header">Set Destination</div>
   <input id="destinationSearch" placeholder="Port or lock name…" autocomplete="off" spellcheck="false">
   <div id="suggestions"></div>
 </div>
 
-<!-- Map -->
 <div id="map"></div>
 
-<!-- GPS status -->
 <div id="statusPill">
   <span id="gpsIndicator"></span>
   <span id="gpsStatus">AWAITING GPS</span>
@@ -400,12 +378,6 @@ html, body {
 <script src="app.js"></script>
 
 <script>
-// Override display updates from app.js to use new element IDs
-// Patch the geolocation callback output
-const _origWatch = navigator.geolocation.watchPosition.bind(navigator.geolocation);
-// Intercept DOM writes via MutationObserver on old elements (none exist now)
-// Instead we expose bridge functions app.js can call
-
 window.hudUpdate = function(data) {
   const set = (id, val, active) => {
     const el = document.getElementById(id);
@@ -423,18 +395,22 @@ window.hudUpdate = function(data) {
   if (data.eta  !== undefined) set('etaVal',   data.eta,   data.eta   !== '--h--');
   if (data.dest !== undefined) {
     const el = document.getElementById('destName');
-    el.textContent = data.dest || 'Not set';
-    el.classList.toggle('empty', !data.dest);
+    if (el) {
+      el.textContent = data.dest || 'Not set';
+      el.classList.toggle('empty', !data.dest);
+    }
   }
   if (data.gps !== undefined) {
     const dot = document.getElementById('gpsIndicator');
     const txt = document.getElementById('gpsStatus');
-    dot.className = 'active';
-    txt.textContent = 'GPS ACTIVE';
+    if (dot) dot.className = 'active';
+    if (txt) txt.textContent = 'GPS ACTIVE';
   }
   if (data.gpsError) {
-    document.getElementById('gpsIndicator').className = 'error';
-    document.getElementById('gpsStatus').textContent = 'GPS ERROR';
+    const dot = document.getElementById('gpsIndicator');
+    const txt = document.getElementById('gpsStatus');
+    if (dot) dot.className = 'error';
+    if (txt) txt.textContent = 'GPS ERROR';
   }
 };
 </script>
