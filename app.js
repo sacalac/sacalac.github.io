@@ -26,7 +26,8 @@ fetch(window.location.pathname.substring(0, window.location.pathname.lastIndexOf
 })
 .catch(err => console.error("Error loading Rhine coordinates:", err));
 
-fetch('rhine_places.json')
+fetch(window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/')) + '/rhine_places.json')
+
 .then(r => r.json())
 .then(data => {
   places = data;
