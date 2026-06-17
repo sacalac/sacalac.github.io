@@ -10,7 +10,8 @@ const vesselIcon = L.divIcon({
   iconAnchor: [7, 7]
 });
 
-fetch('rhine_geojson.txt')
+// FIXED: Changed filename from 'rhine_geojson.txt' to matching 'rhine.geojson.txt'
+fetch('rhine.geojson.txt')
 .then(r => r.json())
 .then(data => {
   rhinePoints = data.features
@@ -21,8 +22,9 @@ fetch('rhine_geojson.txt')
       lon: f.geometry.coordinates[0],
       fluss: f.properties.FLUSS
     }));
-  console.log('Rhine markers:', rhinePoints.length);
-});
+  console.log('Rhine markers successfully loaded:', rhinePoints.length);
+})
+.catch(err => console.error("Error loading Rhine coordinates:", err));
 
 fetch('rhine_places.json')
 .then(r => r.json())
@@ -37,7 +39,6 @@ fetch('rhine_places.json')
   }
 })
 .catch(() => {
-  // rhine_places.json not available — silently continue
   places = [];
 });
 
