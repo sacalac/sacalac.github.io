@@ -215,7 +215,7 @@ html, body {
   <div class="gauge">
     <span class="gauge-label">RKM</span>
     <span class="gauge-value dim" id="kmVal">---.-</span>
-    <span class="gauge-unit">km</span>
+    <span class="gauge-unit" id="kmSrcBadge" style="color:var(--muted);letter-spacing:0.12em;">EST</span>
   </div>
   <div class="gauge">
     <span class="gauge-label">SOG</span>
@@ -307,6 +307,13 @@ window.hudUpdate = function(data) {
     if (active !== undefined) el.classList.toggle('dim', !active);
   };
   if (data.km   !== undefined) set('kmVal',    data.km,    data.km    !== '---.-');
+  if (data.kmSrc !== undefined) {
+    const badge = document.getElementById('kmSrcBadge');
+    if (badge) {
+      badge.textContent = data.kmSrc;
+      badge.style.color = data.kmSrc === 'OSM' ? 'var(--green)' : 'var(--muted)';
+    }
+  }
   if (data.sog  !== undefined) set('sogVal',   data.sog,   data.sog   !== '--.-');
   if (data.rem  !== undefined) set('remVal',   data.rem,   data.rem   !== '---.-');
   if (data.locks!== undefined) set('locksVal', data.locks, data.locks !== '--');
