@@ -230,7 +230,77 @@ function interpolateKm(lat, lon) {
   return bestKm;
 }
 
-function countLocks(currentKm, destinationKm) {
+// ── OSM Milestone Snapping ──────────────────────────────────────────────────
+// Queries Overpass for waterway=milestone nodes near the vessel.
+// Throttled: only fires when vessel has moved >200 m from last query point.
+// Falls back to interpolateKm() if no milestone found within snap radius.
+
+const SNAP_RADIUS_M   = 500;   // metres — search circle sent to Overpass
+const SNAP_USE_M      = 300;   // metres — only snap if closest milestone is within this
+const REQUERY_DIST_KM = 0.2;   // km     — minimum movement before re-querying Overpass
+
+let lastQueryCoords  = null;   // {lat, lon} of last Overpass request
+let cachedMilestones = [];     // last batch of milestone nodes returned
+let kmSource         = 'EST';  // 'OSM' | 'EST' — shown in HUD
+
+async function fetchNearbyMilestones(lat, lon) {
+  const r = SNAP_RADIUS_M;
+  const query = `[out:json][timeout:10];
+node(around:${r},${lat},${lon})["waterway"="milestone"];
+out body;`;
+  try {
+    const res = await fetch('https://overpass-api.de/api/interpreter', {
+      method: 'POST',
+      body: query
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    // Keep only nodes that carry a numeric distance tag
+    return (data.elements || []).filter(n => {
+      const d = n.tags && (n.tags.distance || n.tags.name);
+      return d && !isNaN(parseFloat(d));
+    }).map(n => ({
+      lat:  n.lat,
+      lon:  n.lon,
+      km:   parseFloat(n.tags.distance || n.tags.name)
+    }));
+  } catch (e) {
+    console.warn('Overpass query failed:', e);
+    return [];
+  }
+}
+
+// Returns the best km value for the current position.
+// Side-effect: updates kmSource and triggers a Overpass refresh when needed.
+async function resolveKm(lat, lon) {
+  // Decide whether to re-query Overpass
+  const movedFar = !lastQueryCoords ||
+    distance(lastQueryCoords.lat, lastQueryCoords.lon, lat, lon) >= REQUERY_DIST_KM;
+
+  if (movedFar) {
+    lastQueryCoords  = { lat, lon };
+    cachedMilestones = await fetchNearbyMilestones(lat, lon);
+  }
+
+  // Find closest milestone in the cached batch
+  if (cachedMilestones.length > 0) {
+    let closest = null, closestDist = Infinity;
+    for (const m of cachedMilestones) {
+      const d = distance(lat, lon, m.lat, m.lon);
+      if (d < closestDist) { closestDist = d; closest = m; }
+    }
+    if (closest && closestDist * 1000 <= SNAP_USE_M) {
+      kmSource = 'OSM';
+      return closest.km;
+    }
+  }
+
+  // Fallback to GeoJSON interpolation
+  kmSource = 'EST';
+  return interpolateKm(lat, lon);
+}
+// ────────────────────────────────────────────────────────────────────────────
+
   const min = Math.min(currentKm, destinationKm);
   const max = Math.max(currentKm, destinationKm);
   return places.filter(p => p.type === 'lock' && p.km >= min && p.km <= max).length;
@@ -268,11 +338,11 @@ function triggerRouteRedraw() {
 
 // ── Main Positioning Processing Stream
 navigator.geolocation.watchPosition(
-  position => {
+  async position => {
     const lat   = position.coords.latitude;
     const lon   = position.coords.longitude;
     const speed = (position.coords.speed || 0) * 3.6;
-    const km    = interpolateKm(lat, lon);
+    const km    = await resolveKm(lat, lon);
     lastCalculatedKm = km;
 
     // Resolve true heading trajectory using hardware fallback matrix
@@ -316,9 +386,10 @@ navigator.geolocation.watchPosition(
     }
 
     const update = {
-      km:  km ? km.toFixed(1) : '---.-',
-      sog: speed.toFixed(1),
-      gps: true
+      km:     km ? km.toFixed(1) : '---.-',
+      kmSrc:  kmSource,
+      sog:    speed.toFixed(1),
+      gps:    true
     };
 
     if (selectedDestination && km) {
