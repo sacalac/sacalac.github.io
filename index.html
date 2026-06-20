@@ -101,17 +101,8 @@ html, body {
   letter-spacing: 0.1em;
 }
 
-/* Settings Icon inside Lock box */
-.lock-cfg-btn {
-  position: absolute;
-  right: 6px; top: 6px;
-  background: transparent;
-  border: none;
-  color: var(--muted);
-  cursor: pointer;
-  font-size: 11px;
-}
-.lock-cfg-btn:hover { color: var(--cyan); }
+/* Third control button */
+#cfgBtn { top: calc(72px + 126px); font-size: 16px; }
 
 #dest-callout {
   display: flex;
@@ -145,7 +136,7 @@ html, body {
   transition: all 0.15s;
 }
 .control-btn:hover { background: rgba(20,30,50,0.98); border-color: var(--cyan); }
-#searchBtn { top: calc(72px + 14px); }
+#searchBtn  { top: calc(72px + 14px); }
 #mapLockBtn { top: calc(72px + 70px); font-size: 16px; }
 #mapLockBtn.unlocked { color: var(--muted); border-color: var(--border); }
 
@@ -178,7 +169,8 @@ html, body {
 /* ── CONFIG MODAL ── */
 #configPanel {
   position: absolute;
-  top: 86px; right: 14px;
+  top: calc(72px + 126px);
+  left: 68px;
   width: 220px;
   background: rgba(12,18,28,0.97);
   border: 1px solid var(--border);
@@ -236,7 +228,6 @@ html, body {
     <span class="gauge-unit">km</span>
   </div>
   <div class="gauge">
-    <button class="lock-cfg-btn" id="cfgToggleBtn">⚙</button>
     <span class="gauge-label">LOCKS</span>
     <span class="gauge-value dim" id="locksVal">--</span>
     <span class="gauge-unit">ahead</span>
@@ -260,8 +251,27 @@ html, body {
   </div>
 </div>
 
-<button id="searchBtn" class="control-btn" title="Search Destination">⌖</button>
-<button id="mapLockBtn" class="control-btn" title="Toggle Map Cam-Follow">⚓</button>
+<button id="searchBtn" class="control-btn" title="Search Destination">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+    <circle cx="12" cy="9" r="2.5"/>
+  </svg>
+</button>
+<button id="mapLockBtn" class="control-btn" title="Toggle Map Cam-Follow">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="3"/>
+    <line x1="12" y1="2" x2="12" y2="6"/>
+    <line x1="12" y1="18" x2="12" y2="22"/>
+    <line x1="2" y1="12" x2="6" y2="12"/>
+    <line x1="18" y1="12" x2="22" y2="12"/>
+  </svg>
+</button>
+<button id="cfgBtn" class="control-btn" title="Navigation Parameters">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="3"/>
+    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+  </svg>
+</button>
 
 <div id="searchPanel">
   <div id="searchPanel-header">Set Destination</div>
@@ -320,7 +330,7 @@ window.hudUpdate = function(data) {
 };
 
 // UI Toggles
-document.getElementById('cfgToggleBtn').addEventListener('click', (e) => {
+document.getElementById('cfgBtn').addEventListener('click', (e) => {
   e.stopPropagation();
   const p = document.getElementById('configPanel');
   p.style.display = p.style.display === 'block' ? 'none' : 'block';
