@@ -8,20 +8,14 @@ let lockDelayMinutes = 30; // Configurable lock overhead parameter
 const shipSvg = `
 <div class="vessel-icon-container" id="vesselRotator">
   <svg class="vessel-svg" viewBox="0 0 32 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <!-- Hull: flat bottom, tapered bow at top -->
     <path d="M10 36 L6 20 L8 8 L16 2 L24 8 L26 20 L22 36 Z"
           fill="#1a3a5c" stroke="#4dd9e8" stroke-width="1.2" stroke-linejoin="round"/>
-    <!-- Waterline band -->
     <path d="M7.5 22 L24.5 22" stroke="#4dd9e8" stroke-width="0.8" opacity="0.5"/>
-    <!-- Superstructure / wheelhouse -->
     <rect x="12" y="14" width="8" height="7" rx="1"
           fill="#0e2a44" stroke="#4dd9e8" stroke-width="0.9"/>
-    <!-- Wheelhouse windows -->
     <rect x="13.5" y="15.5" width="2" height="2" rx="0.4" fill="#4dd9e8" opacity="0.9"/>
     <rect x="16.5" y="15.5" width="2" height="2" rx="0.4" fill="#4dd9e8" opacity="0.9"/>
-    <!-- Mast -->
     <line x1="16" y1="4" x2="16" y2="14" stroke="#4dd9e8" stroke-width="0.8" opacity="0.7"/>
-    <!-- Bow light -->
     <circle cx="16" cy="3.5" r="1.2" fill="#ffffff" opacity="0.95"/>
   </svg>
 </div>`;
@@ -188,8 +182,6 @@ function interpolateKm(lat, lon) {
   if (rhinePoints.length < 2) return null;
 
   // Search all consecutive segment pairs for the closest perpendicular projection.
-  // Simple nearest-2-points can snap wrongly near bends where two distant segments
-  // are equidistant; instead we test every segment and keep the best projected point.
   let bestKm   = null;
   let bestDist = Infinity;
 
@@ -197,8 +189,6 @@ function interpolateKm(lat, lon) {
     const a = rhinePoints[i];
     const b = rhinePoints[i + 1];
 
-    // Represent segment and query point in a flat Cartesian approximation
-    // (good enough for short river segments; avoids full spherical projection)
     const toRad = Math.PI / 180;
     const cosLat = Math.cos(((a.lat + b.lat) / 2) * toRad);
 
@@ -210,13 +200,11 @@ function interpolateKm(lat, lon) {
     const apx = px - ax, apy = py - ay;
     const ab2 = abx * abx + aby * aby;
 
-    // Project p onto the segment ab, clamped to [0,1]
     const t = ab2 === 0 ? 0 : Math.max(0, Math.min(1, (apx * abx + apy * aby) / ab2));
 
     const closestX = ax + t * abx;
     const closestY = ay + t * aby;
 
-    // Actual geodesic distance from query to the projected point
     const closestLat = closestY;
     const closestLon = closestX / cosLat;
     const d = distance(lat, lon, closestLat, closestLon);
@@ -231,17 +219,13 @@ function interpolateKm(lat, lon) {
 }
 
 // ── OSM Milestone Snapping ──────────────────────────────────────────────────
-// Queries Overpass for waterway=milestone nodes near the vessel.
-// Throttled: only fires when vessel has moved >200 m from last query point.
-// Falls back to interpolateKm() if no milestone found within snap radius.
+const SNAP_RADIUS_M   = 500;   
+const SNAP_USE_M      = 300;   
+const REQUERY_DIST_KM = 0.2;   
 
-const SNAP_RADIUS_M   = 500;   // metres — search circle sent to Overpass
-const SNAP_USE_M      = 300;   // metres — only snap if closest milestone is within this
-const REQUERY_DIST_KM = 0.2;   // km     — minimum movement before re-querying Overpass
-
-let lastQueryCoords  = null;   // {lat, lon} of last Overpass request
-let cachedMilestones = [];     // last batch of milestone nodes returned
-let kmSource         = 'EST';  // 'OSM' | 'EST' — shown in HUD
+let lastQueryCoords  = null;   
+let cachedMilestones = [];     
+let kmSource         = 'EST';  
 
 async function fetchNearbyMilestones(lat, lon) {
   const r = SNAP_RADIUS_M;
@@ -255,7 +239,6 @@ out body;`;
     });
     if (!res.ok) return [];
     const data = await res.json();
-    // Keep only nodes that carry a numeric distance tag
     return (data.elements || []).filter(n => {
       const d = n.tags && (n.tags.distance || n.tags.name);
       return d && !isNaN(parseFloat(d));
@@ -270,10 +253,7 @@ out body;`;
   }
 }
 
-// Returns the best km value for the current position.
-// Side-effect: updates kmSource and triggers a Overpass refresh when needed.
 async function resolveKm(lat, lon) {
-  // Decide whether to re-query Overpass
   const movedFar = !lastQueryCoords ||
     distance(lastQueryCoords.lat, lastQueryCoords.lon, lat, lon) >= REQUERY_DIST_KM;
 
@@ -282,7 +262,6 @@ async function resolveKm(lat, lon) {
     cachedMilestones = await fetchNearbyMilestones(lat, lon);
   }
 
-  // Find closest milestone in the cached batch
   if (cachedMilestones.length > 0) {
     let closest = null, closestDist = Infinity;
     for (const m of cachedMilestones) {
@@ -295,12 +274,13 @@ async function resolveKm(lat, lon) {
     }
   }
 
-  // Fallback to GeoJSON interpolation
   kmSource = 'EST';
   return interpolateKm(lat, lon);
 }
 // ────────────────────────────────────────────────────────────────────────────
 
+// FIXED: Added missing function declaration line
+function countLocks(currentKm, destinationKm) {
   const min = Math.min(currentKm, destinationKm);
   const max = Math.max(currentKm, destinationKm);
   return places.filter(p => p.type === 'lock' && p.km >= min && p.km <= max).length;
@@ -316,6 +296,8 @@ function drawRiverPathLine(currentKm, destKm) {
 
   // Filter geo nodes falling directly inside bounding window
   const pathNodes = rhinePoints.filter(p => p.km >= start && p.km <= end);
+  
+  // FIXED: Standardize correctly back to arrays [lat, lon] expected by Leaflet polylines
   const latLngs = pathNodes.map(p => [p.lat, p.lon]);
 
   if (latLngs.length > 1) {
@@ -323,7 +305,7 @@ function drawRiverPathLine(currentKm, destKm) {
       color: '#4dd9e8',
       weight: 4,
       opacity: 0.8,
-      dashArray: '1, 8', // Pulse tech appearance lines
+      dashArray: '1, 8', 
       lineCap: 'round'
     }).addTo(map);
   }
@@ -345,11 +327,9 @@ navigator.geolocation.watchPosition(
     const km    = await resolveKm(lat, lon);
     lastCalculatedKm = km;
 
-    // Resolve true heading trajectory using hardware fallback matrix
     let heading = position.coords.heading;
     if (heading === null || isNaN(heading)) {
       if (previousCoords && distance(previousCoords.lat, previousCoords.lon, lat, lon) > 0.005) {
-        // Calculate heading azimuth manually based on movement displacement vectors
         const dLon = (lon - previousCoords.lon) * Math.PI / 180;
         const lat1 = previousCoords.lat * Math.PI / 180;
         const lat2 = lat * Math.PI / 180;
@@ -363,14 +343,12 @@ navigator.geolocation.watchPosition(
     lastValidHeading = heading;
     previousCoords = { lat, lon };
 
-    // Update marker or create asset instance
     if (!marker) {
       marker = L.marker([lat, lon], { icon: vesselIcon }).addTo(map);
     } else {
       marker.setLatLng([lat, lon]);
     }
 
-    // CSS rotation execution directly injecting into active marker container instance element
     setTimeout(() => {
       const rotator = document.getElementById('vesselRotator');
       if (rotator) {
@@ -406,7 +384,6 @@ navigator.geolocation.watchPosition(
       update.ttl   = String(ttlMin);
       update.eta   = `${etaH}h${String(etaM).padStart(2,'0')}`;
 
-      // Refresh path line matching current updated position point coordinates
       drawRiverPathLine(km, selectedDestination.km);
     } else {
       update.rem   = '---.-';
