@@ -4,20 +4,33 @@ let selectedDestination = null;
 let followVessel = true; // Map lock tracking state
 let lockDelayMinutes = 30; // Configurable lock overhead parameter
 
-// Glowing Ship SVG template pointed upward (0 degrees Heading reference)
+// Realistic inland vessel SVG — pointed upward = 0° heading reference
 const shipSvg = `
 <div class="vessel-icon-container" id="vesselRotator">
-  <svg class="vessel-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M12 2L17 7V17L12 22L7 17V7L12 2.02V2Z" fill="#4dd9e8" stroke="#ffffff" stroke-width="1.5" stroke-linejoin="round"/>
-    <circle cx="12" cy="11" r="2" fill="#0a0f1a"/>
+  <svg class="vessel-svg" viewBox="0 0 32 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Hull: flat bottom, tapered bow at top -->
+    <path d="M10 36 L6 20 L8 8 L16 2 L24 8 L26 20 L22 36 Z"
+          fill="#1a3a5c" stroke="#4dd9e8" stroke-width="1.2" stroke-linejoin="round"/>
+    <!-- Waterline band -->
+    <path d="M7.5 22 L24.5 22" stroke="#4dd9e8" stroke-width="0.8" opacity="0.5"/>
+    <!-- Superstructure / wheelhouse -->
+    <rect x="12" y="14" width="8" height="7" rx="1"
+          fill="#0e2a44" stroke="#4dd9e8" stroke-width="0.9"/>
+    <!-- Wheelhouse windows -->
+    <rect x="13.5" y="15.5" width="2" height="2" rx="0.4" fill="#4dd9e8" opacity="0.9"/>
+    <rect x="16.5" y="15.5" width="2" height="2" rx="0.4" fill="#4dd9e8" opacity="0.9"/>
+    <!-- Mast -->
+    <line x1="16" y1="4" x2="16" y2="14" stroke="#4dd9e8" stroke-width="0.8" opacity="0.7"/>
+    <!-- Bow light -->
+    <circle cx="16" cy="3.5" r="1.2" fill="#ffffff" opacity="0.95"/>
   </svg>
 </div>`;
 
 const vesselIcon = L.divIcon({
   className: '',
   html: shipSvg,
-  iconSize: [32, 32],
-  iconAnchor: [16, 16]
+  iconSize: [32, 40],
+  iconAnchor: [16, 20]
 });
 
 // Polyline asset instance mapping the river route trailing line
@@ -57,7 +70,19 @@ fetch(`${basePath}/rhine-places.json`)
   });
 
 const map = L.map('map', { zoomControl: true }).setView([50, 7], 6);
-L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+// Base OSM layer (OpenSeaMap needs it underneath)
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 19,
+  attribution: '© OpenStreetMap contributors'
+}).addTo(map);
+
+// OpenSeaMap nautical overlay (buoys, depth contours, waterway marks, locks…)
+L.tileLayer('https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png', {
+  maxZoom: 18,
+  opacity: 0.85,
+  attribution: '© OpenSeaMap contributors'
+}).addTo(map);
 
 let marker = null;
 let firstFix = true;
@@ -161,14 +186,48 @@ function getNearestPoints(lat, lon) {
 
 function interpolateKm(lat, lon) {
   if (rhinePoints.length < 2) return null;
-  const nearest = getNearestPoints(lat, lon);
-  if(nearest.length < 2) return null;
-  const [a, b] = nearest;
-  const total = distance(a.lat, a.lon, b.lat, b.lon);
-  if (total === 0) return a.km;
-  const d = distance(a.lat, a.lon, lat, lon);
-  const ratio = Math.max(0, Math.min(1, d / total));
-  return a.km + (b.km - a.km) * ratio;
+
+  // Search all consecutive segment pairs for the closest perpendicular projection.
+  // Simple nearest-2-points can snap wrongly near bends where two distant segments
+  // are equidistant; instead we test every segment and keep the best projected point.
+  let bestKm   = null;
+  let bestDist = Infinity;
+
+  for (let i = 0; i < rhinePoints.length - 1; i++) {
+    const a = rhinePoints[i];
+    const b = rhinePoints[i + 1];
+
+    // Represent segment and query point in a flat Cartesian approximation
+    // (good enough for short river segments; avoids full spherical projection)
+    const toRad = Math.PI / 180;
+    const cosLat = Math.cos(((a.lat + b.lat) / 2) * toRad);
+
+    const ax = a.lon * cosLat, ay = a.lat;
+    const bx = b.lon * cosLat, by = b.lat;
+    const px = lon  * cosLat, py = lat;
+
+    const abx = bx - ax, aby = by - ay;
+    const apx = px - ax, apy = py - ay;
+    const ab2 = abx * abx + aby * aby;
+
+    // Project p onto the segment ab, clamped to [0,1]
+    const t = ab2 === 0 ? 0 : Math.max(0, Math.min(1, (apx * abx + apy * aby) / ab2));
+
+    const closestX = ax + t * abx;
+    const closestY = ay + t * aby;
+
+    // Actual geodesic distance from query to the projected point
+    const closestLat = closestY;
+    const closestLon = closestX / cosLat;
+    const d = distance(lat, lon, closestLat, closestLon);
+
+    if (d < bestDist) {
+      bestDist = d;
+      bestKm   = a.km + (b.km - a.km) * t;
+    }
+  }
+
+  return bestKm;
 }
 
 function countLocks(currentKm, destinationKm) {
