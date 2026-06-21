@@ -1,24 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Rhine Navigation</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow+Condensed:wght@300;400;600;700&display=swap" rel="stylesheet">
+
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --water-blue: #2563eb;
-  --panel-bg:   rgba(255, 255, 255, 0.85); /* Light frosted glass */
-  --border:     #cbd5e1;
-  --accent:     #ef4444; /* Vibrant red for pins/buttons */
-  --text-main:  #0f172a; /* Dark slate for high contrast */
-  --text-muted: #64748b;
-  --green:      #10b981;
-  --mono:       'Share Tech Mono', monospace; /* Keep for numbers */
-  --sans:       -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --navy:     #0a0f1a;
+  --panel:    #0e1622;
+  --panel2:   #121d2e;
+  --border:   #1e3050;
+  --amber:    #f5a623;
+  --cyan:     #4dd9e8;
+  --white:    #e8eef5;
+  --muted:    #4a6080;
+  --green:    #2ecc71;
+  --red:      #e74c3c;
+  --mono:     'Share Tech Mono', monospace;
+  --cond:     'Barlow Condensed', sans-serif;
 }
 
 html, body {
   height: 100%;
   overflow: hidden;
-  background: #f8fafc;
-  font-family: var(--sans);
-  color: var(--text-main);
+  background: var(--navy);
+  font-family: var(--cond);
+  color: var(--white);
 }
 
 #map {
@@ -26,15 +40,15 @@ html, body {
   inset: 0;
   width: 100%;
   height: 100%;
-  /* Removed the dark filters so the map is bright and colorful */
+  filter: brightness(0.85) saturate(0.9);
 }
 
-/* ── HUD BARS (Light Mode) ── */
+/* ── HUD BARS ── */
 .hud-bar {
   position: absolute;
   left: 0; right: 0;
   z-index: 1000;
-  background: linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.85) 100%);
+  background: linear-gradient(180deg, rgba(10,15,26,0.97) 0%, rgba(10,15,26,0.85) 100%);
   border-color: var(--border);
   border-style: solid;
   backdrop-filter: blur(12px);
@@ -43,10 +57,9 @@ html, body {
   align-items: stretch;
   gap: 2px;
   height: 72px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }
 #hud-top { top: 0; border-width: 0 0 1px 0; }
-#hud-bottom { bottom: 0; border-width: 1px 0 0 0; box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.05); }
+#hud-bottom { bottom: 0; border-width: 1px 0 0 0; }
 
 .gauge {
   display: flex;
@@ -62,54 +75,34 @@ html, body {
 .gauge:last-child { border-right: none; }
 
 .gauge-label {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
+  font-family: var(--cond);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--text-muted);
+  color: var(--muted);
   margin-bottom: 3px;
 }
 .gauge-value {
   font-family: var(--mono);
-  font-size: 24px;
-  font-weight: 600;
-  color: var(--text-main);
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--amber);
   line-height: 1;
+  letter-spacing: 0.04em;
 }
-.gauge-value.dim { color: var(--text-muted); }
-.gauge-value.highlight { color: var(--water-blue); font-family: var(--sans); font-weight: 700; font-size: 18px;}
+.gauge-value.dim { color: var(--muted); }
+.gauge-value.highlight { color: var(--cyan); }
 .gauge-unit {
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--text-muted);
+  font-family: var(--cond);
+  font-size: 10px;
+  color: var(--muted);
   margin-top: 2px;
+  letter-spacing: 0.1em;
 }
 
-/* ── CONTROLS PANEL ── */
-.control-btn {
-  position: absolute;
-  left: 14px;
-  width: 46px; height: 46px;
-  border: 1px solid var(--border);
-  border-radius: 50%; /* Make them friendly circles */
-  background: var(--panel-bg);
-  backdrop-filter: blur(8px);
-  color: var(--water-blue);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  z-index: 1200;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
-}
-.control-btn:hover { background: #ffffff; transform: scale(1.05); }
-#searchBtn  { top: calc(72px + 14px); }
-#mapLockBtn { top: calc(72px + 70px); font-size: 16px; }
-#mapLockBtn.unlocked { color: var(--text-muted); }
-
-/* Hide the technical panels for now */
-#searchPanel, #configPanel { display: none !important; }
+/* Third control button */
+#cfgBtn { top: calc(72px + 126px); font-size: 16px; }
 
 #dest-callout {
   display: flex;
@@ -118,26 +111,241 @@ html, body {
   padding: 8px 16px;
   border-left: 1px solid var(--border);
   min-width: 140px;
-  flex: 2;
+  max-width: 220px;
 }
-#dest-callout .label { font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
-#dest-callout .dest-name { font-size: 16px; font-weight: 700; color: var(--water-blue); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#dest-callout .label { font-size: 9px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.15em;}
+#dest-callout .dest-name { font-size: 16px; font-weight: 700; color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#dest-callout .dest-name.empty { color: var(--muted); font-weight: 400; font-style: italic; }
+
+/* ── CONTROLS PANEL (LEFT SIDE) ── */
+.control-btn {
+  position: absolute;
+  left: 14px;
+  width: 46px; height: 46px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: rgba(10,15,26,0.92);
+  backdrop-filter: blur(8px);
+  color: var(--cyan);
+  font-size: 18px;
+  z-index: 1200;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+.control-btn:hover { background: rgba(20,30,50,0.98); border-color: var(--cyan); }
+#searchBtn  { top: calc(72px + 14px); }
+#mapLockBtn { top: calc(72px + 70px); font-size: 16px; }
+#mapLockBtn.unlocked { color: var(--muted); border-color: var(--border); }
+
+/* ── SEARCH DIALOG ── */
+#searchPanel {
+  position: absolute;
+  top: calc(72px + 14px);
+  left: -340px;
+  width: 300px;
+  background: rgba(12,18,28,0.97);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+  z-index: 1100;
+  transition: left 0.22s cubic-bezier(0.4,0,0.2,1);
+  backdrop-filter: blur(16px);
+}
+#searchPanel.open { left: 68px; }
+#searchPanel-header { font-size: 10px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+#destinationSearch { width: 100%; background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 4px; color: var(--white); font-family: var(--cond); font-size: 15px; padding: 10px 12px; outline: none; }
+#destinationSearch:focus { border-color: var(--cyan); }
+#suggestions { margin-top: 8px; max-height: 260px; overflow-y: auto; }
+.suggestion { padding: 9px 12px; border-bottom: 1px solid rgba(30,48,80,0.5); cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+.suggestion:hover { background: rgba(77,217,232,0.07); color: var(--cyan); }
+.suggestion-type { font-size: 9px; font-weight: 600; text-transform: uppercase; padding: 2px 5px; border-radius: 3px; background: rgba(255,255,255,0.06); color: var(--muted); }
+.suggestion-type.lock { color: var(--amber); background: rgba(245,166,35,0.1); }
+.suggestion-type.port { color: var(--cyan); background: rgba(77,217,232,0.1); }
+.suggestion-km { margin-left: auto; font-family: var(--mono); font-size: 11px; color: var(--muted); }
+
+/* ── CONFIG MODAL ── */
+#configPanel {
+  position: absolute;
+  top: calc(72px + 126px);
+  left: 68px;
+  width: 220px;
+  background: rgba(12,18,28,0.97);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 12px;
+  z-index: 1100;
+  display: none;
+  backdrop-filter: blur(16px);
+}
+.config-row { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
+.config-row label { font-size: 12px; color: var(--white); }
+.config-row input { width: 60px; background: rgba(0,0,0,0.3); border: 1px solid var(--border); color: var(--amber); font-family: var(--mono); text-align: center; padding: 4px; outline: none; border-radius: 4px; }
 
 #statusPill {
   position: absolute; bottom: 86px; right: 14px; z-index: 1000;
-  background: var(--panel-bg); border: 1px solid var(--border); border-radius: 20px;
-  padding: 6px 12px; font-size: 11px; font-weight: 600; color: var(--text-main);
+  background: rgba(10,15,26,0.9); border: 1px solid var(--border); border-radius: 6px;
+  padding: 6px 12px; font-family: var(--mono); font-size: 11px; color: var(--muted);
   display: flex; align-items: center; gap: 8px; backdrop-filter: blur(8px);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
-#gpsIndicator { width: 8px; height: 8px; border-radius: 50%; background: var(--text-muted); }
+#gpsIndicator { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); }
 #gpsIndicator.active { background: var(--green); box-shadow: 0 0 6px var(--green); }
+#gpsIndicator.error  { background: var(--red); }
 
 .leaflet-control-attribution { display: none; }
-.leaflet-control-zoom { margin-bottom: 80px !important; border: none !important; }
-.leaflet-bar a { background-color: var(--panel-bg) !important; color: var(--water-blue) !important; }
+.leaflet-control-zoom { margin-bottom: 80px !important; }
 
 /* ── SHIP MARKER CONTAINER ── */
-.vessel-icon-container { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; transition: transform 0.2s linear; }
-.vessel-svg { width: 28px; height: 28px; filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.3)); }
+.vessel-icon-container {
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform 0.2s linear; /* Smooth rotating */
+}
+.vessel-svg {
+  width: 28px; height: 28px;
+  filter: drop-shadow(0px 0px 5px rgba(77,217,232,0.8));
+}
 </style>
+</head>
+<body>
+
+<div id="hud-top" class="hud-bar">
+  <div class="gauge">
+    <span class="gauge-label">RKM</span>
+    <span class="gauge-value dim" id="kmVal">---.-</span>
+    <span class="gauge-unit" id="kmSrcBadge" style="color:var(--muted);letter-spacing:0.12em;">EST</span>
+  </div>
+  <div class="gauge">
+    <span class="gauge-label">SOG</span>
+    <span class="gauge-value dim" id="sogVal">--.-</span>
+    <span class="gauge-unit">km/h</span>
+  </div>
+  <div class="gauge">
+    <span class="gauge-label">REM</span>
+    <span class="gauge-value dim" id="remVal">---.-</span>
+    <span class="gauge-unit">km</span>
+  </div>
+  <div class="gauge">
+    <span class="gauge-label">LOCKS</span>
+    <span class="gauge-value dim" id="locksVal">--</span>
+    <span class="gauge-unit">ahead</span>
+  </div>
+</div>
+
+<div id="hud-bottom" class="hud-bar">
+  <div class="gauge">
+    <span class="gauge-label">TTL</span>
+    <span class="gauge-value dim" id="ttlVal">--</span>
+    <span class="gauge-unit">min</span>
+  </div>
+  <div class="gauge">
+    <span class="gauge-label">ETA</span>
+    <span class="gauge-value highlight dim" id="etaVal">--h--</span>
+    <span class="gauge-unit">&nbsp;</span>
+  </div>
+  <div id="dest-callout">
+    <span class="label">Destination</span>
+    <span class="dest-name empty" id="destName">Not set</span>
+  </div>
+</div>
+
+<button id="searchBtn" class="control-btn" title="Search Destination">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+    <circle cx="12" cy="9" r="2.5"/>
+  </svg>
+</button>
+<button id="mapLockBtn" class="control-btn" title="Toggle Map Cam-Follow">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="3"/>
+    <line x1="12" y1="2" x2="12" y2="6"/>
+    <line x1="12" y1="18" x2="12" y2="22"/>
+    <line x1="2" y1="12" x2="6" y2="12"/>
+    <line x1="18" y1="12" x2="22" y2="12"/>
+  </svg>
+</button>
+<button id="cfgBtn" class="control-btn" title="Navigation Parameters">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="3"/>
+    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+  </svg>
+</button>
+
+<div id="searchPanel">
+  <div id="searchPanel-header">Set Destination</div>
+  <input id="destinationSearch" placeholder="Type Port or Lock name…" autocomplete="off" spellcheck="false">
+  <div id="suggestions"></div>
+</div>
+
+<div id="configPanel">
+  <div id="searchPanel-header">Navigation Parameters</div>
+  <div class="config-row">
+    <label>Lock Delay:</label>
+    <input type="number" id="lockDelayInput" value="30" min="0" max="180">
+    <span style="font-size:11px; color:var(--muted); margin-left:4px;">min</span>
+  </div>
+</div>
+
+<div id="map"></div>
+
+<div id="statusPill">
+  <span id="gpsIndicator"></span>
+  <span id="gpsStatus">AWAITING GPS</span>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="app.js"></script>
+
+<script>
+window.hudUpdate = function(data) {
+  const set = (id, val, active) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = val;
+    if (active !== undefined) el.classList.toggle('dim', !active);
+  };
+  if (data.km   !== undefined) set('kmVal',    data.km,    data.km    !== '---.-');
+  if (data.kmSrc !== undefined) {
+    const badge = document.getElementById('kmSrcBadge');
+    if (badge) {
+      badge.textContent = data.kmSrc;
+      badge.style.color = data.kmSrc === 'OSM' ? 'var(--green)' : 'var(--muted)';
+    }
+  }
+  if (data.sog  !== undefined) set('sogVal',   data.sog,   data.sog   !== '--.-');
+  if (data.rem  !== undefined) set('remVal',   data.rem,   data.rem   !== '---.-');
+  if (data.locks!== undefined) set('locksVal', data.locks, data.locks !== '--');
+  if (data.ttl  !== undefined) set('ttlVal',   data.ttl,   data.ttl   !== '--');
+  if (data.eta  !== undefined) set('etaVal',   data.eta,   data.eta   !== '--h--');
+  if (data.dest !== undefined) {
+    const el = document.getElementById('destName');
+    if (el) {
+      el.textContent = data.dest || 'Not set';
+      el.classList.toggle('empty', !data.dest);
+    }
+  }
+  if (data.gps) {
+    document.getElementById('gpsIndicator').className = 'active';
+    document.getElementById('gpsStatus').textContent = 'GPS ACTIVE';
+  }
+  if (data.gpsError) {
+    document.getElementById('gpsIndicator').className = 'error';
+    document.getElementById('gpsStatus').textContent = 'GPS ERROR';
+  }
+};
+
+// UI Toggles
+document.getElementById('cfgBtn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  const p = document.getElementById('configPanel');
+  p.style.display = p.style.display === 'block' ? 'none' : 'block';
+});
+document.body.addEventListener('click', () => {
+  document.getElementById('configPanel').style.display = 'none';
+});
+document.getElementById('configPanel').addEventListener('click', e => e.stopPropagation());
+</script>
+</body>
+</html>
