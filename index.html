@@ -35,8 +35,7 @@ html, body {
   color: var(--white);
 }
 
-/* Oversized Map Wrapper to allow CSS rotation without clipping corners.
-*/
+/* Oversized Map Wrapper to allow CSS rotation without clipping corners. */
 #map-wrapper {
   position: absolute;
   inset: 0;
@@ -144,10 +143,15 @@ html, body {
 }
 .control-btn:hover { background: rgba(20,30,50,0.98); border-color: var(--cyan); }
 #searchBtn  { top: calc(72px + 14px); }
-#mapLockBtn { top: calc(72px + 70px); font-size: 16px; }
+
+/* Lock Button States */
+#mapLockBtn { top: calc(72px + 70px); font-size: 16px; color: var(--cyan); }
 #mapLockBtn.unlocked { color: var(--muted); border-color: var(--border); }
+
+/* Head Up Button States */
 #headUpBtn  { top: calc(72px + 126px); font-size: 16px; color: var(--muted); border-color: var(--border); }
 #headUpBtn.active { color: var(--cyan); border-color: var(--cyan); }
+
 #cfgBtn     { top: calc(72px + 182px); font-size: 16px; }
 
 /* ── SEARCH DIALOG ── */
@@ -205,7 +209,7 @@ html, body {
 #gpsIndicator.error  { background: var(--red); }
 
 .leaflet-control-attribution { display: none; }
-.leaflet-control-zoom { display: none; } /* Disabled due to oversized map wrapper */
+.leaflet-control-zoom { display: none; } 
 
 /* ── SHIP MARKER CONTAINER ── */
 .vessel-icon-container {
@@ -251,9 +255,9 @@ html, body {
     <span class="gauge-unit">min</span>
   </div>
   <div class="gauge">
-    <span class="gauge-label">ARRIVAL</span>
+    <span class="gauge-label">ETA</span>
     <span class="gauge-value highlight dim" id="etaVal">--:--</span>
-    <span class="gauge-unit">TIME</span>
+    <span class="gauge-unit">&nbsp;</span>
   </div>
   <div id="dest-callout">
     <span class="label">Destination</span>
