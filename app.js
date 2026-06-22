@@ -2,7 +2,7 @@ let branchPaths = [];
 let places = [];
 let selectedDestination = null;
 
-let followVessel = true; // Auto-follow
+let followVessel = true; // Auto-follow map lock
 let headUp = false;      // North-Up / Head-Up Map Rotation
 let lockDelayMinutes = 30; 
 
@@ -64,7 +64,6 @@ fetch(`${basePath}/rhine-places.json`)
     }
   });
 
-// Disable zoom control so it doesn't get pushed off the oversized rotating map canvas
 const map = L.map('map', { zoomControl: false }).setView([50, 7], 6);
 
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -100,16 +99,13 @@ mapLockBtn.addEventListener('click', () => {
   followVessel = !followVessel;
   if(followVessel) {
     mapLockBtn.classList.remove('unlocked');
-    mapLockBtn.style.color = "var(--cyan)";
     if(marker) map.panTo(marker.getLatLng());
   } else {
-    // If user breaks camera lock, disable Head-Up mode to fix dragging orientation
+    // If user deliberately unlocks, disable Head-Up mode to fix dragging
     headUp = false;
     mapContainer.style.transform = `rotate(0deg)`;
     headUpBtn.classList.remove('active');
-    
     mapLockBtn.classList.add('unlocked');
-    mapLockBtn.style.color = "var(--muted)";
   }
 });
 
@@ -121,7 +117,6 @@ headUpBtn.addEventListener('click', () => {
     // Enforce vessel follow in head-up mode
     followVessel = true;
     mapLockBtn.classList.remove('unlocked');
-    mapLockBtn.style.color = "var(--cyan)";
     if(marker) map.panTo(marker.getLatLng());
   } else {
     headUpBtn.classList.remove('active');
@@ -129,15 +124,14 @@ headUpBtn.addEventListener('click', () => {
   }
 });
 
-map.on('movestart', (e) => {
-  if (e.hard) return; 
+// BUG FIX: Detect physical dragging instead of programmatic panning!
+map.on('dragstart', () => {
   if (followVessel) {
     followVessel = false;
-    headUp = false; // Turn off rotation if user interacts
+    headUp = false; 
     mapContainer.style.transform = `rotate(0deg)`;
     headUpBtn.classList.remove('active');
     mapLockBtn.classList.add('unlocked');
-    mapLockBtn.style.color = "var(--muted)";
   }
 });
 
@@ -235,7 +229,6 @@ let cachedMilestones = [];
 let kmSource         = 'EST';  
 
 async function fetchNearbyMilestones(lat, lon) {
-  // Query for both generic milestones and explicit OpenSeaMap distance markers
   const query = `[out:json][timeout:10];
 (
   node(around:${SNAP_RADIUS_M},${lat},${lon})["waterway"="milestone"];
@@ -247,7 +240,6 @@ out body;`;
     if (!res.ok) return [];
     const data = await res.json();
     return (data.elements || []).filter(n => {
-      // Prioritize the exact seamark tags OpenSeaMap uses to paint its map
       const d = n.tags && (n.tags['seamark:distance:value'] || n.tags.distance || n.tags.name);
       return d && !isNaN(parseFloat(d));
     }).map(n => ({
@@ -273,12 +265,10 @@ async function resolveKm(lat, lon) {
       if (d < closestDist) { closestDist = d; closest = m; }
     }
     
-    // Find our exact offset from the nearest physical OSM marker on the map
     if (closest) {
       kmSource = 'OSM';
       const milestoneEstKm = interpolateKm(closest.lat, closest.lon);
       if (milestoneEstKm !== null && currentEstKm !== null) {
-        // Yields the exact decimal matching the map database, smoothly rolling
         const fractionalOffset = currentEstKm - milestoneEstKm;
         return closest.km + fractionalOffset; 
       }
@@ -387,29 +377,11 @@ navigator.geolocation.watchPosition(
       const moveSpd  = Math.max(speed, 1.5); 
       const etaHours = distLeft / moveSpd + ttlMin / 60;
       
-      // Calculate real clock time arrival
+      // Real clock time ETA formatting (Forces 24-hour clock, e.g. "14:25")
       const arrivalTime = new Date(Date.now() + etaHours * 3600000);
-      const timeString  = arrivalTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const timeString  = arrivalTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
 
       update.rem   = distLeft.toFixed(1);
       update.locks = String(locks);
       update.ttl   = String(ttlMin);
-      update.eta   = timeString; // Displays as "14:30" etc.
-
-      drawRiverPathLine(km, selectedDestination.km);
-    } else {
-      update.rem   = '---.-';
-      update.locks = '--';
-      update.ttl   = '--';
-      update.eta   = '--:--';
-      if (routeLine) { map.removeLayer(routeLine); routeLine = null; }
-    }
-
-    if (window.hudUpdate) window.hudUpdate(update);
-  },
-  error => {
-    console.error(error);
-    if (window.hudUpdate) window.hudUpdate({ gpsError: true });
-  },
-  { enableHighAccuracy: true, maximumAge: 1000, timeout: 10000 }
-);
+      update.eta
