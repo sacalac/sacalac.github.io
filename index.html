@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <title>Rhine Navigation</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,18 +13,18 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --navy:     #0a0f1a;
-  --panel:    #0e1622;
-  --panel2:   #121d2e;
-  --border:   #1e3050;
-  --amber:    #f5a623;
-  --cyan:     #4dd9e8;
-  --white:    #e8eef5;
-  --muted:    #4a6080;
-  --green:    #2ecc71;
-  --red:      #e74c3c;
-  --mono:     'Share Tech Mono', monospace;
-  --cond:     'Barlow Condensed', sans-serif;
+  --navy:  #0a0f1a;
+  --panel: #0e1622;
+  --panel2:#121d2e;
+  --border:#1e3050;
+  --amber: #f5a623;
+  --cyan:  #4dd9e8;
+  --white: #e8eef5;
+  --muted: #4a6080;
+  --green: #2ecc71;
+  --red:   #e74c3c;
+  --mono:  'Share Tech Mono', monospace;
+  --cond:  'Barlow Condensed', sans-serif;
 }
 
 html, body {
@@ -58,7 +58,7 @@ html, body {
   gap: 2px;
   height: 72px;
 }
-#hud-top { top: 0; border-width: 0 0 1px 0; }
+#hud-top    { top: 0;    border-width: 0 0 1px 0; }
 #hud-bottom { bottom: 0; border-width: 1px 0 0 0; }
 
 .gauge {
@@ -86,23 +86,29 @@ html, body {
 .gauge-value {
   font-family: var(--mono);
   font-size: 22px;
-  font-weight: 400;
   color: var(--amber);
   line-height: 1;
   letter-spacing: 0.04em;
 }
-.gauge-value.dim { color: var(--muted); }
+.gauge-value.dim       { color: var(--muted); }
 .gauge-value.highlight { color: var(--cyan); }
 .gauge-unit {
   font-family: var(--cond);
   font-size: 10px;
   color: var(--muted);
   margin-top: 2px;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
 }
 
-/* Third control button */
-#cfgBtn { top: calc(72px + 126px); font-size: 16px; }
+/* ETA sub-line: clock arrival time */
+.gauge-sub {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 1px;
+  letter-spacing: 0.06em;
+}
+.gauge-sub.active { color: var(--green); }
 
 #dest-callout {
   display: flex;
@@ -113,11 +119,11 @@ html, body {
   min-width: 140px;
   max-width: 220px;
 }
-#dest-callout .label { font-size: 9px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.15em;}
+#dest-callout .label     { font-size: 9px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.15em; }
 #dest-callout .dest-name { font-size: 16px; font-weight: 700; color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 #dest-callout .dest-name.empty { color: var(--muted); font-weight: 400; font-style: italic; }
 
-/* ── CONTROLS PANEL (LEFT SIDE) ── */
+/* ── LEFT SIDE BUTTONS ── */
 .control-btn {
   position: absolute;
   left: 14px;
@@ -136,11 +142,13 @@ html, body {
   transition: all 0.15s;
 }
 .control-btn:hover { background: rgba(20,30,50,0.98); border-color: var(--cyan); }
-#searchBtn  { top: calc(72px + 14px); }
-#mapLockBtn { top: calc(72px + 70px); font-size: 16px; }
-#mapLockBtn.unlocked { color: var(--muted); border-color: var(--border); }
 
-/* ── SEARCH DIALOG ── */
+#searchBtn  { top: calc(72px + 14px); }
+#mapLockBtn { top: calc(72px + 70px); }
+#headingBtn { top: calc(72px + 126px); color: var(--muted); }
+#cfgBtn     { top: calc(72px + 182px); color: var(--muted); }
+
+/* ── SEARCH PANEL ── */
 #searchPanel {
   position: absolute;
   top: calc(72px + 14px);
@@ -155,23 +163,23 @@ html, body {
   backdrop-filter: blur(16px);
 }
 #searchPanel.open { left: 68px; }
-#searchPanel-header { font-size: 10px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+.panel-header { font-size: 10px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
 #destinationSearch { width: 100%; background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 4px; color: var(--white); font-family: var(--cond); font-size: 15px; padding: 10px 12px; outline: none; }
 #destinationSearch:focus { border-color: var(--cyan); }
 #suggestions { margin-top: 8px; max-height: 260px; overflow-y: auto; }
-.suggestion { padding: 9px 12px; border-bottom: 1px solid rgba(30,48,80,0.5); cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+.suggestion      { padding: 9px 12px; border-bottom: 1px solid rgba(30,48,80,0.5); cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 8px; }
 .suggestion:hover { background: rgba(77,217,232,0.07); color: var(--cyan); }
-.suggestion-type { font-size: 9px; font-weight: 600; text-transform: uppercase; padding: 2px 5px; border-radius: 3px; background: rgba(255,255,255,0.06); color: var(--muted); }
+.suggestion-type  { font-size: 9px; font-weight: 600; text-transform: uppercase; padding: 2px 5px; border-radius: 3px; background: rgba(255,255,255,0.06); color: var(--muted); }
 .suggestion-type.lock { color: var(--amber); background: rgba(245,166,35,0.1); }
-.suggestion-type.port { color: var(--cyan); background: rgba(77,217,232,0.1); }
+.suggestion-type.port { color: var(--cyan);  background: rgba(77,217,232,0.1); }
 .suggestion-km { margin-left: auto; font-family: var(--mono); font-size: 11px; color: var(--muted); }
 
-/* ── CONFIG MODAL ── */
+/* ── CONFIG PANEL ── */
 #configPanel {
   position: absolute;
-  top: calc(72px + 126px);
+  top: calc(72px + 182px);
   left: 68px;
-  width: 220px;
+  width: 230px;
   background: rgba(12,18,28,0.97);
   border: 1px solid var(--border);
   border-radius: 6px;
@@ -180,42 +188,45 @@ html, body {
   display: none;
   backdrop-filter: blur(16px);
 }
-.config-row { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
-.config-row label { font-size: 12px; color: var(--white); }
-.config-row input { width: 60px; background: rgba(0,0,0,0.3); border: 1px solid var(--border); color: var(--amber); font-family: var(--mono); text-align: center; padding: 4px; outline: none; border-radius: 4px; }
+.config-row       { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; gap: 8px; }
+.config-row label { font-size: 12px; color: var(--white); flex: 1; }
+.config-row input { width: 64px; background: rgba(0,0,0,0.3); border: 1px solid var(--border); color: var(--amber); font-family: var(--mono); text-align: center; padding: 4px 6px; outline: none; border-radius: 4px; font-size: 14px; }
+.config-unit      { font-size: 11px; color: var(--muted); }
 
+/* ── STATUS PILL ── */
 #statusPill {
   position: absolute; bottom: 86px; right: 14px; z-index: 1000;
   background: rgba(10,15,26,0.9); border: 1px solid var(--border); border-radius: 6px;
   padding: 6px 12px; font-family: var(--mono); font-size: 11px; color: var(--muted);
   display: flex; align-items: center; gap: 8px; backdrop-filter: blur(8px);
 }
-#gpsIndicator { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); }
+#gpsIndicator        { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); }
 #gpsIndicator.active { background: var(--green); box-shadow: 0 0 6px var(--green); }
 #gpsIndicator.error  { background: var(--red); }
 
 .leaflet-control-attribution { display: none; }
 .leaflet-control-zoom { margin-bottom: 80px !important; }
 
-/* ── SHIP MARKER CONTAINER ── */
+/* ── VESSEL ICON ── */
 .vessel-icon-container {
-  width: 32px; height: 32px;
+  width: 20px; height: 100px;
   display: flex; align-items: center; justify-content: center;
-  transition: transform 0.2s linear; /* Smooth rotating */
+  transition: transform 0.2s linear;
 }
 .vessel-svg {
-  width: 28px; height: 28px;
-  filter: drop-shadow(0px 0px 5px rgba(77,217,232,0.8));
+  width: 20px; height: 100px;
+  filter: drop-shadow(0 0 4px rgba(77,217,232,0.9));
 }
 </style>
 </head>
 <body>
 
+<!-- TOP HUD: RKM | SOG | REM | LOCKS -->
 <div id="hud-top" class="hud-bar">
   <div class="gauge">
     <span class="gauge-label">RKM</span>
     <span class="gauge-value dim" id="kmVal">---.-</span>
-    <span class="gauge-unit" id="kmSrcBadge" style="color:var(--muted);letter-spacing:0.12em;">EST</span>
+    <span class="gauge-unit" id="kmSrcBadge" style="letter-spacing:0.12em;">EST</span>
   </div>
   <div class="gauge">
     <span class="gauge-label">SOG</span>
@@ -234,16 +245,17 @@ html, body {
   </div>
 </div>
 
+<!-- BOTTOM HUD: NXT LCK | ETA | DESTINATION -->
 <div id="hud-bottom" class="hud-bar">
   <div class="gauge">
-    <span class="gauge-label">TTL</span>
+    <span class="gauge-label">NXT LCK</span>
     <span class="gauge-value dim" id="ttlVal">--</span>
-    <span class="gauge-unit">min</span>
+    <span class="gauge-unit">min away</span>
   </div>
   <div class="gauge">
     <span class="gauge-label">ETA</span>
     <span class="gauge-value highlight dim" id="etaVal">--h--</span>
-    <span class="gauge-unit">&nbsp;</span>
+    <span class="gauge-sub" id="etaClockVal">--:--</span>
   </div>
   <div id="dest-callout">
     <span class="label">Destination</span>
@@ -251,21 +263,38 @@ html, body {
   </div>
 </div>
 
+<!-- LEFT BUTTONS -->
+
+<!-- 1. Search / destination -->
 <button id="searchBtn" class="control-btn" title="Search Destination">
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
     <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
     <circle cx="12" cy="9" r="2.5"/>
   </svg>
 </button>
-<button id="mapLockBtn" class="control-btn" title="Toggle Map Cam-Follow">
+
+<!-- 2. Follow ship toggle -->
+<button id="mapLockBtn" class="control-btn" title="Auto-follow ship (tap to free roam)">
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
     <circle cx="12" cy="12" r="3"/>
-    <line x1="12" y1="2" x2="12" y2="6"/>
+    <line x1="12" y1="2"  x2="12" y2="6"/>
     <line x1="12" y1="18" x2="12" y2="22"/>
-    <line x1="2" y1="12" x2="6" y2="12"/>
+    <line x1="2"  y1="12" x2="6"  y2="12"/>
     <line x1="18" y1="12" x2="22" y2="12"/>
   </svg>
 </button>
+
+<!-- 3. Head-up / North-up toggle -->
+<button id="headingBtn" class="control-btn" title="North-up (tap for Head-up)">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="10"/>
+    <polygon points="12,4 10,12 14,12" fill="currentColor" stroke="none"/>
+    <polygon points="12,20 10,12 14,12" fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.4"/>
+    <text x="12" y="8.8" text-anchor="middle" font-family="sans-serif" font-size="4.5" font-weight="bold" fill="currentColor" stroke="none">N</text>
+  </svg>
+</button>
+
+<!-- 4. Settings -->
 <button id="cfgBtn" class="control-btn" title="Navigation Parameters">
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
     <circle cx="12" cy="12" r="3"/>
@@ -273,18 +302,20 @@ html, body {
   </svg>
 </button>
 
+<!-- Search panel (slides in from left) -->
 <div id="searchPanel">
-  <div id="searchPanel-header">Set Destination</div>
+  <div class="panel-header">Set Destination</div>
   <input id="destinationSearch" placeholder="Type Port or Lock name…" autocomplete="off" spellcheck="false">
   <div id="suggestions"></div>
 </div>
 
+<!-- Config panel -->
 <div id="configPanel">
-  <div id="searchPanel-header">Navigation Parameters</div>
+  <div class="panel-header">Navigation Parameters</div>
   <div class="config-row">
-    <label>Lock Delay:</label>
+    <label>Lock delay</label>
     <input type="number" id="lockDelayInput" value="30" min="0" max="180">
-    <span style="font-size:11px; color:var(--muted); margin-left:4px;">min</span>
+    <span class="config-unit">min</span>
   </div>
 </div>
 
@@ -299,6 +330,7 @@ html, body {
 <script src="app.js"></script>
 
 <script>
+// ── HUD update handler ────────────────────────────────────────────────────────
 window.hudUpdate = function(data) {
   const set = (id, val, active) => {
     const el = document.getElementById(id);
@@ -306,7 +338,14 @@ window.hudUpdate = function(data) {
     el.textContent = val;
     if (active !== undefined) el.classList.toggle('dim', !active);
   };
-  if (data.km   !== undefined) set('kmVal',    data.km,    data.km    !== '---.-');
+
+  if (data.km    !== undefined) set('kmVal',    data.km,    data.km    !== '---.-');
+  if (data.sog   !== undefined) set('sogVal',   data.sog,   data.sog   !== '--.-');
+  if (data.rem   !== undefined) set('remVal',   data.rem,   data.rem   !== '---.-');
+  if (data.locks !== undefined) set('locksVal', data.locks, data.locks !== '--');
+  if (data.ttl   !== undefined) set('ttlVal',   data.ttl,   data.ttl   !== '--');
+  if (data.eta   !== undefined) set('etaVal',   data.eta,   data.eta   !== '--h--');
+
   if (data.kmSrc !== undefined) {
     const badge = document.getElementById('kmSrcBadge');
     if (badge) {
@@ -314,11 +353,15 @@ window.hudUpdate = function(data) {
       badge.style.color = data.kmSrc === 'OSM' ? 'var(--green)' : 'var(--muted)';
     }
   }
-  if (data.sog  !== undefined) set('sogVal',   data.sog,   data.sog   !== '--.-');
-  if (data.rem  !== undefined) set('remVal',   data.rem,   data.rem   !== '---.-');
-  if (data.locks!== undefined) set('locksVal', data.locks, data.locks !== '--');
-  if (data.ttl  !== undefined) set('ttlVal',   data.ttl,   data.ttl   !== '--');
-  if (data.eta  !== undefined) set('etaVal',   data.eta,   data.eta   !== '--h--');
+
+  if (data.etaClock !== undefined) {
+    const el = document.getElementById('etaClockVal');
+    if (el) {
+      el.textContent = data.etaClock;
+      el.classList.toggle('active', data.etaClock !== '--:--');
+    }
+  }
+
   if (data.dest !== undefined) {
     const el = document.getElementById('destName');
     if (el) {
@@ -326,18 +369,19 @@ window.hudUpdate = function(data) {
       el.classList.toggle('empty', !data.dest);
     }
   }
+
   if (data.gps) {
     document.getElementById('gpsIndicator').className = 'active';
-    document.getElementById('gpsStatus').textContent = 'GPS ACTIVE';
+    document.getElementById('gpsStatus').textContent  = 'GPS ACTIVE';
   }
   if (data.gpsError) {
     document.getElementById('gpsIndicator').className = 'error';
-    document.getElementById('gpsStatus').textContent = 'GPS ERROR';
+    document.getElementById('gpsStatus').textContent  = 'GPS ERROR';
   }
 };
 
-// UI Toggles
-document.getElementById('cfgBtn').addEventListener('click', (e) => {
+// ── UI wiring ─────────────────────────────────────────────────────────────────
+document.getElementById('cfgBtn').addEventListener('click', e => {
   e.stopPropagation();
   const p = document.getElementById('configPanel');
   p.style.display = p.style.display === 'block' ? 'none' : 'block';
