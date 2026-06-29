@@ -27,12 +27,11 @@
 html, body {
   height: 100%;
   overflow: hidden;
-  background: #e2e8f0; /* Slight gray so you can see if the map fails to load */
+  background: #e2e8f0; 
   font-family: var(--sans);
   color: var(--text-main);
 }
 
-/* Oversized Map Wrapper to allow CSS rotation without clipping corners */
 #map-wrapper {
   position: absolute;
   inset: 0;
@@ -42,7 +41,6 @@ html, body {
 
 #map {
   position: absolute;
-  /* Swapped vmax to foolproof vw/vh for maximum tablet compatibility */
   width: 200vw;
   height: 200vh;
   left: -50vw;
@@ -107,8 +105,8 @@ html, body {
   bottom: 24px;
   left: 50%;
   transform: translateX(-50%);
-  width: 92%;
-  max-width: 500px;
+  width: 95%;
+  max-width: 650px; /* Increased to fit the 3 columns comfortably */
   z-index: 1000;
   background: rgba(255, 255, 255, 0.95);
   border: 1px solid var(--border);
@@ -126,7 +124,7 @@ html, body {
   justify-content: center;
   padding: 8px 16px;
   border-left: 1px solid var(--border);
-  flex: 2;
+  flex: 1.5;
   overflow: hidden;
 }
 #dest-callout .label { font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px;}
@@ -208,7 +206,6 @@ html, body {
 }
 .suggestion-km { margin-left: auto; font-family: var(--mono); font-size: 13px; color: var(--text-muted); }
 
-/* Hidden panels */
 #configPanel { display: none; }
 
 #statusPill {
@@ -222,19 +219,7 @@ html, body {
 #gpsIndicator.active { background: var(--green); box-shadow: 0 0 8px var(--green); }
 #gpsIndicator.error  { background: var(--red); }
 
-.leaflet-control-attribution { display: none; }
-.leaflet-control-zoom { display: none; } 
-
-/* ── SHIP MARKER CONTAINER ── */
-.vessel-icon-container {
-  width: 32px; height: 160px;
-  display: flex; align-items: center; justify-content: center;
-  transition: transform 0.2s linear; 
-}
-.vessel-svg {
-  width: 32px; height: 160px;
-  filter: drop-shadow(0px 4px 8px rgba(0,0,0,0.3));
-}
+.leaflet-control-attribution, .leaflet-control-zoom { display: none; } 
 </style>
 </head>
 <body>
@@ -246,18 +231,22 @@ html, body {
     <span class="gauge-unit" id="kmSrcBadge" style="color:var(--text-muted);">EST</span>
   </div>
   <div class="gauge">
-    <span class="gauge-label">REGION</span>
-    <span class="gauge-value highlight" id="regionVal">Rhine</span>
-    <span class="gauge-unit">Waterway</span>
+    <span class="gauge-label">NEXT LOCK</span>
+    <span class="gauge-value highlight dim" id="nextLockEta">--:--</span>
+    <span class="gauge-unit" id="locksRemainStr">-- REMAINING</span>
   </div>
   <div class="gauge">
-    <span class="gauge-label">SPEED</span>
+    <span class="gauge-label">AVG SPEED</span>
     <span class="gauge-value dim" id="sogVal">--.-</span>
     <span class="gauge-unit">km/h</span>
   </div>
 </div>
 
 <div id="hud-bottom" class="hud-bar">
+  <div class="gauge" style="flex: 0.8; border-right: 1px solid var(--border);">
+    <span class="gauge-label">WATERWAY</span>
+    <span class="gauge-value highlight">Rhine</span>
+  </div>
   <div class="gauge" style="flex: 0.8; border-right: none; padding-right: 16px;">
     <span class="gauge-label">ARRIVAL</span>
     <span class="gauge-value dim" id="etaVal">--:--</span>
@@ -328,8 +317,13 @@ window.hudUpdate = function(data) {
       badge.style.color = data.kmSrc === 'OSM' ? 'var(--green)' : 'var(--text-muted)';
     }
   }
+  
   if (data.sog  !== undefined) set('sogVal',   data.sog,   data.sog   !== '--.-');
   if (data.eta  !== undefined) set('etaVal',   data.eta,   data.eta   !== '--:--');
+  
+  // New Lock Updates
+  if (data.nextLockEta !== undefined) set('nextLockEta', data.nextLockEta, data.nextLockEta !== '--:--');
+  if (data.locksRemaining !== undefined) set('locksRemainStr', data.locksRemaining, data.locksRemaining !== '0 REMAINING');
   
   if (data.dest !== undefined) {
     const el = document.getElementById('destName');
@@ -349,7 +343,6 @@ window.hudUpdate = function(data) {
   }
 };
 
-// Close search panel if clicking outside
 document.body.addEventListener('click', (e) => {
   const searchPanel = document.getElementById('searchPanel');
   const searchBtn = document.getElementById('searchBtn');
