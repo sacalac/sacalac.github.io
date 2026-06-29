@@ -2,31 +2,12 @@ let branchPaths = [];
 let places = [];
 let selectedDestination = null;
 
-let followVessel = true; // Auto-follow map lock
-let headUp = false;      // North-Up / Head-Up Map Rotation
+let followVessel = true; 
+let headUp = false;      
 let lockDelayMinutes = 30; 
 
-// Greatly elongated 4x inline cargo vessel SVG
-const shipSvg = `
-<div class="vessel-icon-container" id="vesselRotator">
-  <svg class="vessel-svg" viewBox="0 0 32 160" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M 16 2 L 26 20 L 26 140 L 22 156 L 10 156 L 6 140 L 6 20 Z"
-          fill="#1a3a5c" stroke="#4dd9e8" stroke-width="1.2" stroke-linejoin="round"/>
-    <rect x="8" y="24" width="16" height="110" fill="#0e2a44" stroke="#4dd9e8" stroke-width="0.8" opacity="0.5"/>
-    <rect x="12" y="140" width="8" height="10" rx="1" fill="#0e2a44" stroke="#4dd9e8" stroke-width="0.9"/>
-    <rect x="13.5" y="142" width="2" height="2" rx="0.4" fill="#4dd9e8" opacity="0.9"/>
-    <rect x="16.5" y="142" width="2" height="2" rx="0.4" fill="#4dd9e8" opacity="0.9"/>
-    <line x1="16" y1="4" x2="16" y2="14" stroke="#4dd9e8" stroke-width="0.8" opacity="0.7"/>
-    <circle cx="16" cy="3.5" r="1.2" fill="#ffffff" opacity="0.95"/>
-  </svg>
-</div>`;
-
-const vesselIcon = L.divIcon({
-  className: '',
-  html: shipSvg,
-  iconSize: [32, 160],   
-  iconAnchor: [16, 80]   
-});
+// Speed averaging queue to prevent ETA jitter
+let speedHistory = [];
 
 let routeLine = null;
 
@@ -98,7 +79,6 @@ searchBtn.addEventListener('click', (e) => {
   searchPanel.classList.toggle('open');
 });
 
-// Follow / Free Scroll toggle
 mapLockBtn.addEventListener('click', () => {
   followVessel = !followVessel;
   if(followVessel) {
@@ -112,7 +92,6 @@ mapLockBtn.addEventListener('click', () => {
   }
 });
 
-// Head-up / North-Up toggle
 headUpBtn.addEventListener('click', () => {
   headUp = !headUp;
   if(headUp) {
@@ -126,7 +105,6 @@ headUpBtn.addEventListener('click', () => {
   }
 });
 
-// Detect physical dragging instead of programmatic panning!
 map.on('dragstart', () => {
   if (followVessel) {
     followVessel = false;
@@ -182,6 +160,48 @@ searchInput.addEventListener('input', () => {
       suggestions.appendChild(div);
     });
 });
+
+// ── Dynamic Scalable 135m Ship Generation ──
+function getVesselIcon(lat, zoom) {
+  // Convert map zoom and latitude into true real-world meters per pixel
+  const mpp = 156543.03 * Math.cos(lat * Math.PI / 180) / Math.pow(2, zoom);
+  
+  // Base size of 135m x 15m (Calculated to pixel size, capped at a visible minimum)
+  const pxLength = Math.max(135 / mpp, 25); 
+  const pxWidth  = Math.max(15 / mpp, 25 * (15/135));
+
+  // Sleek Apple-style cargo barge SVG
+  const svg = `
+  <div class="vessel-icon-container" id="vesselRotator" style="width:${pxWidth}px; height:${pxLength}px; transition: transform 0.2s linear;">
+    <svg class="vessel-svg" viewBox="0 0 15 135" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%; filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.4));">
+      <path d="M 7.5 0 C 13 0, 15 5, 15 15 L 15 130 C 15 133, 13 135, 7.5 135 C 2 135, 0 133, 0 130 L 0 15 C 0 5, 2 0, 7.5 0 Z" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
+      <rect x="2.5" y="15" width="10" height="95" fill="#f1f5f9" stroke="#94a3b8" stroke-width="0.8" rx="1"/>
+      <rect x="2.5" y="115" width="10" height="10" fill="#1e293b" rx="1"/>
+      <rect x="3.5" y="116" width="8" height="3" fill="#38bdf8"/>
+      <line x1="7.5" y1="2" x2="7.5" y2="10" stroke="#1e293b" stroke-width="0.8"/>
+    </svg>
+  </div>`;
+
+  return L.divIcon({
+    className: '',
+    html: svg,
+    iconSize: [pxWidth, pxLength],
+    iconAnchor: [pxWidth / 2, pxLength / 2]
+  });
+}
+
+// Re-render the ship size proportionally whenever the user zooms
+map.on('zoomend', () => {
+  if (marker) {
+    const lat = marker.getLatLng().lat;
+    marker.setIcon(getVesselIcon(lat, map.getZoom()));
+    setTimeout(() => {
+      const rotator = document.getElementById('vesselRotator');
+      if (rotator) rotator.style.transform = `rotate(${Math.round(lastValidHeading)}deg)`;
+    }, 10);
+  }
+});
+
 
 function distance(lat1, lon1, lat2, lon2) {
   const R = 6371;
@@ -283,11 +303,6 @@ async function resolveKm(lat, lon) {
   return currentEstKm;
 }
 
-function countLocks(currentKm, destinationKm) {
-  const min = Math.min(currentKm, destinationKm);
-  const max = Math.max(currentKm, destinationKm);
-  return places.filter(p => p.type === 'lock' && p.km >= min && p.km <= max).length;
-}
 
 function drawRiverPathLine(currentKm, destKm) {
   if (branchPaths.length === 0) return;
@@ -321,9 +336,14 @@ navigator.geolocation.watchPosition(
   async position => {
     const lat   = position.coords.latitude;
     const lon   = position.coords.longitude;
-    const speed = (position.coords.speed || 0) * 3.6;
+    const rawSpeed = (position.coords.speed || 0) * 3.6;
     const km    = await resolveKm(lat, lon);
     lastCalculatedKm = km;
+
+    // Rolling average speed over the last 10 ticks (approx 10 seconds)
+    speedHistory.push(rawSpeed);
+    if (speedHistory.length > 10) speedHistory.shift();
+    const avgSpeed = speedHistory.reduce((a, b) => a + b, 0) / speedHistory.length;
 
     let heading = position.coords.heading;
     if (heading === null || isNaN(heading)) {
@@ -342,7 +362,7 @@ navigator.geolocation.watchPosition(
     previousCoords = { lat, lon };
 
     if (!marker) {
-      marker = L.marker([lat, lon], { icon: vesselIcon }).addTo(map);
+      marker = L.marker([lat, lon], { icon: getVesselIcon(lat, map.getZoom()) }).addTo(map);
     } else {
       marker.setLatLng([lat, lon]);
     }
@@ -368,31 +388,50 @@ navigator.geolocation.watchPosition(
     const update = {
       km:     km ? km.toFixed(1) : '---.-',
       kmSrc:  kmSource,
-      sog:    speed.toFixed(1),
+      sog:    avgSpeed.toFixed(1), // Passed the averaged speed to the HUD
       gps:    true
     };
 
     if (selectedDestination && km) {
+      const moveSpd  = Math.max(avgSpeed, 1.5); // Prevent infinite ETA if stopped
       const distLeft = Math.abs(selectedDestination.km - km);
-      const locks    = countLocks(km, selectedDestination.km);
-      const ttlMin   = locks * lockDelayMinutes; 
-      const moveSpd  = Math.max(speed, 1.5); 
-      const etaHours = distLeft / moveSpd + ttlMin / 60;
       
-      const arrivalTime = new Date(Date.now() + etaHours * 3600000);
-      const timeString  = arrivalTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+      // Calculate locks strictly between current pos and destination
+      const minKm = Math.min(km, selectedDestination.km);
+      const maxKm = Math.max(km, selectedDestination.km);
+      const locksInPath = places.filter(p => p.type === 'lock' && p.km >= minKm && p.km <= maxKm);
+      
+      const totalLocks = locksInPath.length;
+      
+      // Top Bar Lock Logic
+      if (totalLocks > 0) {
+        // Find the absolute closest lock to our current position
+        locksInPath.sort((a,b) => Math.abs(a.km - km) - Math.abs(b.km - km));
+        const nextLock = locksInPath[0];
+        
+        const distToLock = Math.abs(nextLock.km - km);
+        const lockEtaHours = distToLock / moveSpd;
+        const lockArrivalTime = new Date(Date.now() + lockEtaHours * 3600000);
+        
+        update.nextLockEta = lockArrivalTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+        update.locksRemaining = `${totalLocks} REMAINING`;
+      } else {
+        update.nextLockEta = '--:--';
+        update.locksRemaining = '0 REMAINING';
+      }
 
-      update.rem   = distLeft.toFixed(1);
-      update.locks = String(locks);
-      update.ttl   = String(ttlMin);
-      update.eta   = timeString;
+      // Final Destination ETA Logic (incorporating lock delays)
+      const ttlMin = totalLocks * lockDelayMinutes; 
+      const etaHours = distLeft / moveSpd + ttlMin / 60;
+      const arrivalTime = new Date(Date.now() + etaHours * 3600000);
+      
+      update.eta = arrivalTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
 
       drawRiverPathLine(km, selectedDestination.km);
     } else {
-      update.rem   = '---.-';
-      update.locks = '--';
-      update.ttl   = '--';
       update.eta   = '--:--';
+      update.nextLockEta = '--:--';
+      update.locksRemaining = '0 REMAINING';
       if (routeLine) { map.removeLayer(routeLine); routeLine = null; }
     }
 
