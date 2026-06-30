@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <title>Rhine Travel Companion</title>
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -26,7 +26,9 @@
 
 html, body {
   height: 100%;
-  overflow: hidden;
+  width: 100%;
+  overflow: hidden; /* Prevent Safari bounce scroll */
+  position: fixed;
   background: #e2e8f0; 
   font-family: var(--sans);
   color: var(--text-main);
@@ -48,18 +50,21 @@ html, body {
   transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
-/* ── HUD TOP BAR ── */
+/* ── HUD TOP BAR (Fixed for iOS) ── */
 #hud-top {
-  position: absolute;
+  position: fixed; /* Locked to screen */
   top: 0; left: 0; right: 0;
-  z-index: 1000;
+  z-index: 9999; /* Forces it above all map tiles */
   background: linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.80) 100%);
   border-bottom: 1px solid var(--border);
   backdrop-filter: blur(20px);
-  padding: 0 16px;
+  -webkit-backdrop-filter: blur(20px); /* Required for iOS blur */
+  
+  /* env() protects the UI from the iPhone notch/dynamic island */
+  padding: env(safe-area-inset-top) 16px 0 16px; 
   display: flex;
   align-items: stretch;
-  height: 80px;
+  height: calc(80px + env(safe-area-inset-top)); 
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
 }
 
@@ -99,19 +104,20 @@ html, body {
   margin-top: 4px;
 }
 
-/* ── HUD BOTTOM (Trip Card) ── */
+/* ── HUD BOTTOM (Fixed for iOS) ── */
 #hud-bottom {
-  position: absolute;
-  bottom: 24px;
+  position: fixed; 
+  bottom: calc(24px + env(safe-area-inset-bottom));
   left: 50%;
   transform: translateX(-50%);
   width: 95%;
-  max-width: 650px; /* Increased to fit the 3 columns comfortably */
-  z-index: 1000;
+  max-width: 650px; 
+  z-index: 9999;
   background: rgba(255, 255, 255, 0.95);
   border: 1px solid var(--border);
   border-radius: 20px;
   backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   padding: 12px 16px;
   display: flex;
   align-items: stretch;
@@ -133,18 +139,19 @@ html, body {
 
 #etaVal { color: var(--green); font-size: 24px; font-weight: 700; font-family: var(--sans); }
 
-/* ── CONTROLS PANEL ── */
+/* ── CONTROLS PANEL (Fixed for iOS) ── */
 .control-btn {
-  position: absolute;
+  position: fixed;
   right: 16px;
   width: 48px; height: 48px;
   border: 1px solid var(--border);
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   color: var(--text-main);
   box-shadow: 0 6px 16px rgba(0,0,0,0.1);
-  z-index: 1100;
+  z-index: 9999;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -153,17 +160,17 @@ html, body {
 }
 .control-btn:hover { background: #ffffff; transform: scale(1.05); }
 
-#headUpBtn  { bottom: 120px; color: var(--text-muted); }
+#headUpBtn  { bottom: calc(120px + env(safe-area-inset-bottom)); color: var(--text-muted); }
 #headUpBtn.active { color: var(--water-blue); background: #eff6ff; border-color: #bfdbfe; }
 
-#mapLockBtn { bottom: 180px; color: var(--water-blue); }
+#mapLockBtn { bottom: calc(180px + env(safe-area-inset-bottom)); color: var(--water-blue); }
 #mapLockBtn.unlocked { color: var(--text-muted); border-color: var(--border); }
 
-#searchBtn  { bottom: 240px; }
+#searchBtn  { bottom: calc(240px + env(safe-area-inset-bottom)); }
 
 /* ── SEARCH DIALOG ── */
 #searchPanel {
-  position: absolute;
+  position: fixed;
   bottom: -500px; 
   left: 50%;
   transform: translateX(-50%);
@@ -172,10 +179,11 @@ html, body {
   background: rgba(255, 255, 255, 0.95);
   border: 1px solid var(--border);
   border-radius: 32px 32px 0 0;
-  padding: 24px 20px;
-  z-index: 1300;
+  padding: 24px 20px calc(24px + env(safe-area-inset-bottom));
+  z-index: 10000;
   transition: bottom 0.4s cubic-bezier(0.32, 0.72, 0, 1);
   backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   box-shadow: 0 -10px 40px rgba(0,0,0,0.15);
 }
 #searchPanel.open { bottom: 0; }
@@ -209,10 +217,13 @@ html, body {
 #configPanel { display: none; }
 
 #statusPill {
-  position: absolute; top: 96px; left: 50%; transform: translateX(-50%); z-index: 1000;
+  position: fixed; 
+  top: calc(96px + env(safe-area-inset-top)); 
+  left: 50%; transform: translateX(-50%); z-index: 9999;
   background: rgba(255,255,255,0.9); border: 1px solid var(--border); border-radius: 20px;
   padding: 6px 14px; font-size: 11px; font-weight: 700; color: var(--text-muted);
   display: flex; align-items: center; gap: 8px; backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 #gpsIndicator { width: 8px; height: 8px; border-radius: 50%; background: var(--text-muted); }
