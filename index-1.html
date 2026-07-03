@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Rhine Travel Companion</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --water-blue: #2563eb;
+  --panel-bg:   rgba(255, 255, 255, 0.85);
+  --border:     rgba(0, 0, 0, 0.1);
+  --text-main:  #0f172a; 
+  --text-muted: #64748b;
+  --green:      #10b981;
+  --red:        #e74c3c;
+  --mono:       'Share Tech Mono', monospace;
+  --sans:       -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+html, body {
+  height: 100%;
+  width: 100%;
+  overflow: hidden; /* Prevent Safari bounce scroll */
+  position: fixed;
+  background: #e2e8f0; 
+  font-family: var(--sans);
+  color: var(--text-main);
+}
+
+#map-wrapper {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 1;
+}
+
+#map {
+  position: absolute;
+  width: 200vw;
+  height: 200vh;
+  left: -50vw;
+  top: -50vh;
+  transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* ── HUD TOP BAR (Fixed for iOS) ── */
+#hud-top {
+  position: fixed; /* Locked to screen */
+  top: 0; left: 0; right: 0;
+  z-index: 9999; /* Forces it above all map tiles */
+  background: linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.80) 100%);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px); /* Required for iOS blur */
+  
+  /* env() protects the UI from the iPhone notch/dynamic island */
+  padding: env(safe-area-inset-top) 16px 0 16px; 
+  display: flex;
+  align-items: stretch;
+  height: calc(80px + env(safe-area-inset-top)); 
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+}
+
+.gauge {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 8px 10px;
+  position: relative;
+  flex: 1;
+  border-right: 1px solid var(--border);
+}
+.gauge:last-child { border-right: none; }
+
+.gauge-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+.gauge-value {
+  font-family: var(--mono);
+  font-size: 26px;
+  font-weight: 600;
+  color: var(--text-main);
+  line-height: 1;
+}
+.gauge-value.dim { color: var(--text-muted); }
+.gauge-value.highlight { color: var(--water-blue); font-family: var(--sans); font-weight: 700; font-size: 18px; }
+.gauge-unit {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+/* ── HUD BOTTOM (Fixed for iOS) ── */
+#hud-bottom {
+  position: fixed; 
+  bottom: calc(24px + env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  width: 95%;
+  max-width: 650px; 
+  z-index: 9999;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: 12px 16px;
+  display: flex;
+  align-items: stretch;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+}
+
+#dest-callout {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 8px 16px;
+  border-left: 1px solid var(--border);
+  flex: 1.5;
+  overflow: hidden;
+}
+#dest-callout .label { font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px;}
+#dest-callout .dest-name { font-size: 20px; font-weight: 700; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#dest-callout .dest-name.empty { color: var(--text-muted); font-weight: 500; font-style: italic; }
+
+#etaVal { color: var(--green); font-size: 24px; font-weight: 700; font-family: var(--sans); }
+
+/* ── CONTROLS PANEL (Fixed for iOS) ── */
+.control-btn {
+  position: fixed;
+  right: 16px;
+  width: 48px; height: 48px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: var(--text-main);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+  z-index: 9999;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.control-btn:hover { background: #ffffff; transform: scale(1.05); }
+
+#headUpBtn  { bottom: calc(120px + env(safe-area-inset-bottom)); color: var(--text-muted); }
+#headUpBtn.active { color: var(--water-blue); background: #eff6ff; border-color: #bfdbfe; }
+
+#mapLockBtn { bottom: calc(180px + env(safe-area-inset-bottom)); color: var(--water-blue); }
+#mapLockBtn.unlocked { color: var(--text-muted); border-color: var(--border); }
+
+#searchBtn  { bottom: calc(240px + env(safe-area-inset-bottom)); }
+
+/* ── SEARCH DIALOG ── */
+#searchPanel {
+  position: fixed;
+  bottom: -500px; 
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 600px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid var(--border);
+  border-radius: 32px 32px 0 0;
+  padding: 24px 20px calc(24px + env(safe-area-inset-bottom));
+  z-index: 10000;
+  transition: bottom 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  box-shadow: 0 -10px 40px rgba(0,0,0,0.15);
+}
+#searchPanel.open { bottom: 0; }
+#searchPanel-header { 
+  font-size: 14px; font-weight: 700; color: var(--text-main); 
+  text-align: center; margin-bottom: 16px; 
+}
+#searchPanel::before {
+  content: ''; position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+  width: 40px; height: 5px; background: #cbd5e1; border-radius: 4px;
+}
+#destinationSearch { 
+  width: 100%; background: #f1f5f9; border: none; border-radius: 12px; 
+  color: var(--text-main); font-size: 16px; padding: 14px 16px; outline: none; 
+  transition: box-shadow 0.2s;
+}
+#destinationSearch:focus { box-shadow: 0 0 0 2px var(--water-blue); background: #ffffff; }
+#suggestions { margin-top: 12px; max-height: 300px; overflow-y: auto; padding-bottom: 20px;}
+.suggestion { 
+  padding: 14px 12px; border-bottom: 1px solid #f1f5f9; cursor: pointer; 
+  font-size: 16px; font-weight: 500; display: flex; align-items: center; gap: 12px; 
+  transition: background 0.2s; border-radius: 8px;
+}
+.suggestion:hover { background: #f8fafc; color: var(--water-blue); }
+.suggestion-type { 
+  font-size: 10px; font-weight: 700; text-transform: uppercase; 
+  padding: 4px 8px; border-radius: 6px; background: #e2e8f0; color: var(--text-muted); 
+}
+.suggestion-km { margin-left: auto; font-family: var(--mono); font-size: 13px; color: var(--text-muted); }
+
+#configPanel { display: none; }
+
+#statusPill {
+  position: fixed; 
+  top: calc(96px + env(safe-area-inset-top)); 
+  left: 50%; transform: translateX(-50%); z-index: 9999;
+  background: rgba(255,255,255,0.9); border: 1px solid var(--border); border-radius: 20px;
+  padding: 6px 14px; font-size: 11px; font-weight: 700; color: var(--text-muted);
+  display: flex; align-items: center; gap: 8px; backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+#gpsIndicator { width: 8px; height: 8px; border-radius: 50%; background: var(--text-muted); }
+#gpsIndicator.active { background: var(--green); box-shadow: 0 0 8px var(--green); }
+#gpsIndicator.error  { background: var(--red); }
+
+.leaflet-control-attribution, .leaflet-control-zoom { display: none; } 
+</style>
+</head>
+<body>
+
+<div id="hud-top" class="hud-bar">
+  <div class="gauge">
+    <span class="gauge-label">RIVER KM</span>
+    <span class="gauge-value dim" id="kmVal">---.-</span>
+    <span class="gauge-unit" id="kmSrcBadge" style="color:var(--text-muted);">EST</span>
+  </div>
+  <div class="gauge">
+    <span class="gauge-label">NEXT LOCK</span>
+    <span class="gauge-value highlight dim" id="nextLockEta">--:--</span>
+    <span class="gauge-unit" id="locksRemainStr">-- REMAINING</span>
+  </div>
+  <div class="gauge">
+    <span class="gauge-label">AVG SPEED</span>
+    <span class="gauge-value dim" id="sogVal">--.-</span>
+    <span class="gauge-unit">km/h</span>
+  </div>
+</div>
+
+<div id="hud-bottom" class="hud-bar">
+  <div class="gauge" style="flex: 0.8; border-right: 1px solid var(--border);">
+    <span class="gauge-label">WATERWAY</span>
+    <span class="gauge-value highlight dim" id="waterwayVal">—</span>
+  </div>
+  <div class="gauge" style="flex: 0.8; border-right: none; padding-right: 16px;">
+    <span class="gauge-label">ARRIVAL</span>
+    <span class="gauge-value dim" id="etaVal">--:--</span>
+  </div>
+  <div id="dest-callout">
+    <span class="label">Heading To</span>
+    <span class="dest-name empty" id="destName">Choose a destination</span>
+  </div>
+</div>
+
+<button id="searchBtn" class="control-btn" title="Search Destination">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+    <circle cx="12" cy="9" r="2.5"/>
+  </svg>
+</button>
+<button id="mapLockBtn" class="control-btn" title="Toggle Map Cam-Follow">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="3"/>
+    <line x1="12" y1="2" x2="12" y2="6"/>
+    <line x1="12" y1="18" x2="12" y2="22"/>
+    <line x1="2" y1="12" x2="6" y2="12"/>
+    <line x1="18" y1="12" x2="22" y2="12"/>
+  </svg>
+</button>
+<button id="headUpBtn" class="control-btn" title="Toggle Head-Up / North-Up">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polygon points="12 2 19 21 12 17 5 21 12 2"></polygon>
+  </svg>
+</button>
+
+<div id="searchPanel">
+  <div id="searchPanel-header">Where to?</div>
+  <input id="destinationSearch" placeholder="Search towns, locks, or landmarks…" autocomplete="off" spellcheck="false">
+  <div id="suggestions"></div>
+</div>
+
+<div id="configPanel">
+  <input type="number" id="lockDelayInput" value="30">
+</div>
+
+<div id="map-wrapper">
+  <div id="map"></div>
+</div>
+
+<div id="statusPill">
+  <span id="gpsIndicator"></span>
+  <span id="gpsStatus">AWAITING GPS</span>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="app.js"></script>
+
+<script>
+window.hudUpdate = function(data) {
+  const set = (id, val, active) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = val;
+    if (active !== undefined) el.classList.toggle('dim', !active);
+  };
+  
+  if (data.km   !== undefined) set('kmVal',    data.km,    data.km    !== '---.-');
+  if (data.kmSrc !== undefined) {
+    const badge = document.getElementById('kmSrcBadge');
+    if (badge) {
+      badge.textContent = data.kmSrc;
+      badge.style.color = data.kmSrc === 'OSM' ? 'var(--green)' : 'var(--text-muted)';
+    }
+  }
+  
+  if (data.sog  !== undefined) set('sogVal',   data.sog,   data.sog   !== '--.-');
+  if (data.eta  !== undefined) set('etaVal',   data.eta,   data.eta   !== '--:--');
+  
+  // New Lock Updates
+  if (data.nextLockEta !== undefined) set('nextLockEta', data.nextLockEta, data.nextLockEta !== '--:--');
+  if (data.locksRemaining !== undefined) set('locksRemainStr', data.locksRemaining, data.locksRemaining !== '0 REMAINING');
+
+  // Active waterway (Rhine / Moselle), determined live from GPS position
+  if (data.river !== undefined) {
+    const label = data.river ? data.river.charAt(0).toUpperCase() + data.river.slice(1) : '—';
+    set('waterwayVal', label, !!data.river);
+  }
+  
+  if (data.dest !== undefined) {
+    const el = document.getElementById('destName');
+    if (el) {
+      el.textContent = data.dest || 'Choose a destination';
+      el.classList.toggle('empty', !data.dest);
+    }
+  }
+  
+  if (data.gps) {
+    document.getElementById('gpsIndicator').className = 'active';
+    document.getElementById('gpsStatus').textContent = 'GPS ACTIVE';
+  }
+  if (data.gpsError) {
+    document.getElementById('gpsIndicator').className = 'error';
+    document.getElementById('gpsStatus').textContent = 'GPS ERROR';
+  }
+};
+
+document.body.addEventListener('click', (e) => {
+  const searchPanel = document.getElementById('searchPanel');
+  const searchBtn = document.getElementById('searchBtn');
+  if (!searchPanel.contains(e.target) && !searchBtn.contains(e.target)) {
+    searchPanel.classList.remove('open');
+  }
+});
+</script>
+</body>
+</html>
