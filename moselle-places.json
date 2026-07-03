@@ -1,0 +1,127 @@
+[
+  {
+    "name": "Koblenz",
+    "km": 0.0,
+    "type": "place"
+  },
+  {
+    "name": "L. Koblenz",
+    "km": 1.9,
+    "type": "lock"
+  },
+  {
+    "name": "Winningen",
+    "km": 13.0,
+    "type": "place"
+  },
+  {
+    "name": "Kobern-Gondorf",
+    "km": 18.0,
+    "type": "place"
+  },
+  {
+    "name": "L. Lehmen",
+    "km": 19.4,
+    "type": "lock"
+  },
+  {
+    "name": "Alken",
+    "km": 22.0,
+    "type": "place"
+  },
+  {
+    "name": "L. M\u00fcden",
+    "km": 37.0,
+    "type": "lock"
+  },
+  {
+    "name": "Cochem",
+    "km": 51.0,
+    "type": "place"
+  },
+  {
+    "name": "Beilstein",
+    "km": 59.0,
+    "type": "place"
+  },
+  {
+    "name": "L. Fankel",
+    "km": 59.3,
+    "type": "lock"
+  },
+  {
+    "name": "Bullay",
+    "km": 70.0,
+    "type": "place"
+  },
+  {
+    "name": "Zell",
+    "km": 75.0,
+    "type": "place"
+  },
+  {
+    "name": "L. Aldegund",
+    "km": 78.5,
+    "type": "lock"
+  },
+  {
+    "name": "Traben-Trarbach",
+    "km": 93.0,
+    "type": "place"
+  },
+  {
+    "name": "L. Enkirch",
+    "km": 97.4,
+    "type": "lock"
+  },
+  {
+    "name": "Bernkastel",
+    "km": 120.0,
+    "type": "place"
+  },
+  {
+    "name": "L. Zeltingen",
+    "km": 123.6,
+    "type": "lock"
+  },
+  {
+    "name": "L. Wintrich",
+    "km": 135.5,
+    "type": "lock"
+  },
+  {
+    "name": "Piesport",
+    "km": 137.0,
+    "type": "place"
+  },
+  {
+    "name": "Neumagen",
+    "km": 145.0,
+    "type": "place"
+  },
+  {
+    "name": "L. Detzem",
+    "km": 160.0,
+    "type": "lock"
+  },
+  {
+    "name": "Mehring",
+    "km": 167.0,
+    "type": "place"
+  },
+  {
+    "name": "Schweich",
+    "km": 175.0,
+    "type": "place"
+  },
+  {
+    "name": "L. Trier",
+    "km": 183.0,
+    "type": "lock"
+  },
+  {
+    "name": "Trier",
+    "km": 187.0,
+    "type": "place"
+  }
+]
